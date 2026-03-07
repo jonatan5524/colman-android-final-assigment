@@ -1,4 +1,4 @@
-package com.example.colman_android_final_assigment
+package com.example.colman_android_final_assigment.modules
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.colman_android_final_assigment.R
 
 class LoginFragment : Fragment() {
     override fun onCreateView(
@@ -20,7 +21,6 @@ class LoginFragment : Fragment() {
         val registerLink = view.findViewById<TextView>(R.id.register_link)
 
         loginButton.setOnClickListener {
-            // Bypass login for testing with a "fake user"
             findNavController().navigate(R.id.action_loginFragment_to_feedFragment)
         }
 

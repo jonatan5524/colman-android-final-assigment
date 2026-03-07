@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.colman_android_final_assigment.LoginFragment"
+        android:name="com.example.colman_android_final_assigment.modules.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
         <action
@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.example.colman_android_final_assigment.RegisterFragment"
+        android:name="com.example.colman_android_final_assigment.modules.RegisterFragment"
         android:label="Register"
         tools:layout="@layout/fragment_register">
         <action
@@ -37,7 +37,7 @@
 
     <fragment
         android:id="@+id/feedFragment"
-        android:name="com.example.colman_android_final_assigment.FeedFragment"
+        android:name="com.example.colman_android_final_assigment.modules.FeedFragment"
         android:label="Feed"
         tools:layout="@layout/fragment_feed">
         <action
@@ -56,7 +56,7 @@
 
     <fragment
         android:id="@+id/newPostFragment"
-        android:name="com.example.colman_android_final_assigment.NewPostFragment"
+        android:name="com.example.colman_android_final_assigment.modules.NewPostFragment"
         android:label="New Post"
         tools:layout="@layout/fragment_new_post">
         <action
@@ -68,7 +68,7 @@
 
     <fragment
         android:id="@+id/postDetailsFragment"
-        android:name="com.example.colman_android_final_assigment.PostDetailsFragment"
+        android:name="com.example.colman_android_final_assigment.modules.PostDetailsFragment"
         android:label="Post Details"
         tools:layout="@layout/fragment_post_details">
         <argument
@@ -78,7 +78,7 @@
 
     <fragment
         android:id="@+id/myPostsFragment"
-        android:name="com.example.colman_android_final_assigment.MyPostsFragment"
+        android:name="com.example.colman_android_final_assigment.modules.MyPostsFragment"
         android:label="My Posts"
         tools:layout="@layout/fragment_my_posts">
         <action
@@ -88,7 +88,7 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.colman_android_final_assigment.ProfileFragment"
+        android:name="com.example.colman_android_final_assigment.modules.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
         <action
@@ -98,7 +98,7 @@
 
     <fragment
         android:id="@+id/editProfileFragment"
-        android:name="com.example.colman_android_final_assigment.EditProfileFragment"
+        android:name="com.example.colman_android_final_assigment.modules.EditProfileFragment"
         android:label="Edit Profile"
         tools:layout="@layout/fragment_edit_profile">
         <argument
