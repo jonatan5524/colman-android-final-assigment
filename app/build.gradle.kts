@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.navigation.safeargs.kotlin)
     alias(libs.plugins.kotlin.kapt)
-    // alias(libs.plugins.google.services) // Disabled because google-services.json is missing
 }
 
 android {
