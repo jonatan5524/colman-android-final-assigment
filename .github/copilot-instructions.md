@@ -65,7 +65,7 @@ You must adhere to **Clean Architecture** and **MVVM** principles.
     * Filter by **Category** (Furniture, Electronics, etc.).
 
 #### 3. Post Creation (Give Away)
-* **Inputs:** Title, Description, Image (Camera/Gallery), City, WhatsApp Number.
+* **Inputs:** Title, Description, Image (Camera/Gallery), CityId, Category.
 * **Action:** Save to Firebase Storage (Image) -> Save URL & Metadata to Firestore -> Sync to Local Room.
 
 #### 4. Item Details
