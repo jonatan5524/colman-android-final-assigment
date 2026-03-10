@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
+    android:background="@color/theme_background"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="GiveAway"
-            android:textColor="@color/text_dark"
+            android:textColor="@color/theme_text_primary"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Share. Reuse. Make a Difference."
-            android:textColor="@color/text_gray"
+            android:textColor="@color/theme_text_secondary"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -50,6 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            app:cardBackgroundColor="@color/theme_surface"
             app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
             app:layout_constraintTop_toBottomOf="@id/register_slogan">
@@ -60,11 +61,24 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/avatar_image"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="16dp"
+                    android:padding="2dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_person_placeholder"
+                    app:shapeAppearanceOverlay="@style/CircleImage"
+                    app:strokeColor="@color/background_light"
+                    app:strokeWidth="2dp" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Email"
-                    android:textColor="@color/text_dark"
+                    android:textColor="@color/theme_text_primary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -74,6 +88,8 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/bg_input"
                     android:hint="Enter your email"
+                    android:textColorHint="@color/theme_text_secondary"
+                    android:textColor="@color/theme_text_primary"
                     android:inputType="textEmailAddress"
                     android:paddingHorizontal="16dp" />
 
@@ -82,7 +98,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="Password"
-                    android:textColor="@color/text_dark"
+                    android:textColor="@color/theme_text_primary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -92,6 +108,8 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/bg_input"
                     android:hint="Enter your password"
+                    android:textColorHint="@color/theme_text_secondary"
+                    android:textColor="@color/theme_text_primary"
                     android:inputType="textPassword"
                     android:paddingHorizontal="16dp" />
 
@@ -100,7 +118,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="Name"
-                    android:textColor="@color/text_dark"
+                    android:textColor="@color/theme_text_primary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -110,6 +128,8 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/bg_input"
                     android:hint="Enter your name"
+                    android:textColorHint="@color/theme_text_secondary"
+                    android:textColor="@color/theme_text_primary"
                     android:inputType="textPersonName"
                     android:paddingHorizontal="16dp" />
 
@@ -118,7 +138,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="WhatsApp Number"
-                    android:textColor="@color/text_dark"
+                    android:textColor="@color/theme_text_primary"
                     android:textStyle="bold" />
 
                 <EditText
@@ -128,6 +148,8 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/bg_input"
                     android:hint="+1234567890"
+                    android:textColorHint="@color/theme_text_secondary"
+                    android:textColor="@color/theme_text_primary"
                     android:inputType="phone"
                     android:paddingHorizontal="16dp" />
 

@@ -2,7 +2,12 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Colmanandroidfinalassigment" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary_teal</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/primary_teal_light</item>
+        
+        <item name="android:windowBackground">@color/theme_background</item>
+        <item name="colorSurface">@color/theme_surface</item>
     </style>
 
     <style name="Theme.Colmanandroidfinalassigment" parent="Base.Theme.Colmanandroidfinalassigment" />
