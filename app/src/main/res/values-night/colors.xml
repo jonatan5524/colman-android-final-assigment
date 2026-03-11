@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Use different values for same names for automatic theme switching -->
+    <color name="theme_background">@color/background_dark</color>
+    <color name="theme_surface">@color/surface_dark</color>
+    <color name="theme_input_background">@color/input_background_dark</color>
+    <color name="theme_text_primary">@color/text_light</color>
+    <color name="theme_text_secondary">@color/text_gray_light</color>
+</resources>
