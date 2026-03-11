@@ -27,10 +27,21 @@
             android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Item Title"
+            android:text="@string/post_item_title_hint"
             android:textColor="@color/text_dark"
             android:textSize="14sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/post_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/post_item_category_hint"
+            android:textColor="@color/text_gray"
+            android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,20 +50,26 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:src="@drawable/ic_location"
-                app:tint="@color/text_gray" />
-
             <TextView
                 android:id="@+id/post_location"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="Location"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="4dp"
+                android:drawableTint="@color/text_gray"
+                android:gravity="center_vertical"
+                android:text="@string/post_item_location_hint"
                 android:textColor="@color/text_gray"
                 android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/city_loading_spinner"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
