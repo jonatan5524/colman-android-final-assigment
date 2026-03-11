@@ -18,7 +18,8 @@ class PostsAdapter(
 
         fun bind(post: Post) {
             binding.postTitle.text = post.title
-            binding.postLocation.text = post.category
+            binding.postCategory.text = post.category
+            binding.postLocation.text = post.cityId.toString()
 
             if (post.imageUrl.isNotEmpty()) {
                 Picasso.get()

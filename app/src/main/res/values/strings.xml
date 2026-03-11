@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">colman-android-final-assigment</string>
+    <string name="post_item_title_hint">Item Title</string>
+    <string name="post_item_category_hint">Category</string>
+    <string name="post_item_location_hint">Location</string>
+    <string name="location_icon_description">Location icon</string>
 </resources>
