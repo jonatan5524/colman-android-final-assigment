@@ -1,6 +1,7 @@
 package com.example.colman_android_final_assigment.modules
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -22,18 +23,23 @@ class PostsAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         private var cityJob: Job? = null
+        private var boundPostId: String? = null
 
         fun bind(post: Post) {
+            boundPostId = post.id
             binding.postTitle.text = post.title
             binding.postCategory.text = post.category
 
-            // Cancel any in-flight city lookup from a recycled ViewHolder
             cityJob?.cancel()
-            binding.postLocation.text = "" // clear while loading
+            binding.postLocation.text = ""
+            binding.cityLoadingSpinner.visibility = View.VISIBLE
 
             cityJob = CoroutineScope(Dispatchers.Main).launch {
                 val cityName = CityApiService.getCityNameById(post.cityId)
-                binding.postLocation.text = cityName
+                if (boundPostId == post.id) {
+                    binding.postLocation.text = cityName
+                    binding.cityLoadingSpinner.visibility = View.GONE
+                }
             }
 
             if (post.imageUrl.isNotEmpty()) {
@@ -66,4 +72,3 @@ class PostsAdapter(
         override fun areContentsTheSame(oldItem: Post, newItem: Post) = oldItem == newItem
     }
 }
-
