@@ -134,11 +134,7 @@ class FeedFragment : Fragment() {
             return when {
                 selected.isEmpty() -> allLabel
                 selected.size == 1 -> selected.first()
-                else -> resources.getQuantityString(
-                    R.plurals.filter_selected_count,
-                    selected.size,
-                    selected.size
-                )
+                else -> "${selected.size} selected"
             }
         }
 
@@ -197,7 +193,7 @@ class FeedFragment : Fragment() {
             textSize = 14f
             background = dropdownBg?.constantState?.newDrawable()?.mutate()
             setPadding(padding / 2, padding / 3, padding / 2, padding / 3)
-            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, android.R.drawable.arrow_down_float, 0)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
             compoundDrawablePadding = 8
         }
         cityDropdown.setOnClickListener {
