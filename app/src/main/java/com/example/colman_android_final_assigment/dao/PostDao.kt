@@ -24,17 +24,6 @@ interface PostDao {
     @Query("DELETE FROM posts")
     suspend fun clearAll()
 
-    /** Combined search + optional category/city filter (single values) */
-    @Query("""
-        SELECT * FROM posts 
-        WHERE (LOWER(title) LIKE '%' || LOWER(:query) || '%' 
-            OR LOWER(description) LIKE '%' || LOWER(:query) || '%')
-        AND (:category IS NULL OR category = :category)
-        AND (:cityId IS NULL OR cityId = :cityId)
-        ORDER BY title ASC
-    """)
-    fun searchAndFilter(query: String, category: String?, cityId: Int?): LiveData<List<Post>>
-
     /** Combined search + multi-select category AND city filter */
     @Query("""
         SELECT * FROM posts 
