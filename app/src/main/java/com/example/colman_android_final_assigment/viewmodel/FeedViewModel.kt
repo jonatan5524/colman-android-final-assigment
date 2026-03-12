@@ -91,6 +91,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         _searchQuery.value = ""
         _selectedCategory.value = null
         _selectedCityId.value = null
+        debounceJob?.cancel()
+        debounceJob = null
         _debouncedQuery.value = ""
     }
 
