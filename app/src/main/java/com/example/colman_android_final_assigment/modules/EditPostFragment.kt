@@ -65,6 +65,10 @@ class EditPostFragment : Fragment() {
                 Toast.makeText(context, "Please fill title and description", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.cancelEditPostButton.setOnClickListener {
+            findNavController().popBackStack()
+        }
     }
 
     private fun setupCitySpinner() {

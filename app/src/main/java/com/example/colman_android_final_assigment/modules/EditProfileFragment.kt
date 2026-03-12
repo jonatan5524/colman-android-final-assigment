@@ -60,6 +60,10 @@ class EditProfileFragment : Fragment() {
             }
         }
 
+        binding.cancelEditProfileButton.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         viewModel.updateState.observe(viewLifecycleOwner) { resource ->
             binding.saveProfileProgressBar.visibility = if (resource is Resource.Loading) View.VISIBLE else View.GONE
             binding.saveProfileButton.isEnabled = resource !is Resource.Loading
