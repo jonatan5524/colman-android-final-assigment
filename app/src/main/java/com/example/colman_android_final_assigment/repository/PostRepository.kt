@@ -62,6 +62,32 @@ class PostRepository(context: Context) {
         }
     }
 
+    /**
+     * Delete a post from Firestore and the local Room cache.
+     */
+    suspend fun deletePost(post: Post): Resource<Unit> {
+        return try {
+            firestore.collection("posts").document(post.id).delete().await()
+            postDao.deletePost(post)
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to delete post")
+        }
+    }
+
+    /**
+     * Update the isTaken status of a post in Firestore and the local Room cache.
+     */
+    suspend fun updatePostStatus(post: Post, isTaken: Boolean): Resource<Unit> {
+        return try {
+            firestore.collection("posts").document(post.id).update("isTaken", isTaken).await()
+            postDao.insertPost(post.copy(isTaken = isTaken))
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to update status")
+        }
+    }
+
     private fun mapSnapshotToPosts(snapshot: com.google.firebase.firestore.QuerySnapshot): List<Post> {
         return snapshot.documents.mapNotNull { doc ->
             val userId = when (val ref = doc.get("userId")) {

@@ -25,6 +25,9 @@ class MyPostsViewModel(application: Application) : AndroidViewModel(application)
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _operationState = MutableLiveData<Resource<Unit>>()
+    val operationState: LiveData<Resource<Unit>> = _operationState
+
     init {
         refreshPosts()
     }
@@ -41,6 +44,20 @@ class MyPostsViewModel(application: Application) : AndroidViewModel(application)
                 _errorMessage.value = null
             }
             _isLoading.value = false
+        }
+    }
+
+    fun deletePost(post: Post) {
+        viewModelScope.launch {
+            _operationState.value = Resource.Loading
+            _operationState.value = repository.deletePost(post)
+        }
+    }
+
+    fun togglePostStatus(post: Post) {
+        viewModelScope.launch {
+            _operationState.value = Resource.Loading
+            _operationState.value = repository.updatePostStatus(post, !post.isTaken)
         }
     }
 }

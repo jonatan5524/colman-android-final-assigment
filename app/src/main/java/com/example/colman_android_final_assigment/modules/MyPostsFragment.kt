@@ -5,10 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.databinding.FragmentMyPostsBinding
+import com.example.colman_android_final_assigment.model.Post
 import com.example.colman_android_final_assigment.viewmodel.MyPostsViewModel
 
 class MyPostsFragment : Fragment() {
@@ -33,11 +36,29 @@ class MyPostsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = MyPostsAdapter()
+        adapter = MyPostsAdapter(
+            onToggleStatus = { post ->
+                viewModel.togglePostStatus(post)
+            },
+            onDelete = { post ->
+                showDeleteConfirmation(post)
+            }
+        )
         binding.myPostsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             this.adapter = this@MyPostsFragment.adapter
         }
+    }
+
+    private fun showDeleteConfirmation(post: Post) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Post")
+            .setMessage("Are you sure you want to delete this post?")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deletePost(post)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun observeViewModel() {
@@ -47,6 +68,20 @@ class MyPostsFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.myPostsProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.operationState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is Resource.Loading -> binding.myPostsProgressBar.visibility = View.VISIBLE
+                is Resource.Success -> {
+                    binding.myPostsProgressBar.visibility = View.GONE
+                    Toast.makeText(context, "Operation successful", Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Error -> {
+                    binding.myPostsProgressBar.visibility = View.GONE
+                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->

@@ -11,7 +11,10 @@ import com.example.colman_android_final_assigment.databinding.MyPostListItemBind
 import com.example.colman_android_final_assigment.model.Post
 import com.squareup.picasso.Picasso
 
-class MyPostsAdapter : ListAdapter<Post, MyPostsAdapter.ViewHolder>(PostDiffCallback()) {
+class MyPostsAdapter(
+    private val onToggleStatus: (Post) -> Unit,
+    private val onDelete: (Post) -> Unit
+) : ListAdapter<Post, MyPostsAdapter.ViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = MyPostListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -36,6 +39,10 @@ class MyPostsAdapter : ListAdapter<Post, MyPostsAdapter.ViewHolder>(PostDiffCall
             }
 
             binding.postGivenBadge.visibility = if (post.isTaken) View.VISIBLE else View.GONE
+            binding.markAsGivenButton.text = if (post.isTaken) "Mark as Available" else "Mark as Given"
+
+            binding.markAsGivenButton.setOnClickListener { onToggleStatus(post) }
+            binding.deletePostButton.setOnClickListener { onDelete(post) }
         }
     }
 
