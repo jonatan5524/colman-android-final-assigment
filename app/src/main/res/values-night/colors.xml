@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Use different values for same names for automatic theme switching -->
+    <!-- Deep Dark Mode Colors -->
+    <color name="background_dark">#000000</color> <!-- Pure black like the images -->
+    <color name="surface_dark">#1C1C1E</color>   <!-- Slightly lighter gray for cards -->
+    <color name="input_background_dark">#2C2C2E</color> <!-- For fields/buttons -->
+    <color name="text_light">#FFFFFF</color>
+    <color name="text_gray_light">#8E8E93</color>
+
+    <!-- Semantic Theme Colors Overrides for Dark Mode -->
     <color name="theme_background">@color/background_dark</color>
     <color name="theme_surface">@color/surface_dark</color>
     <color name="theme_input_background">@color/input_background_dark</color>

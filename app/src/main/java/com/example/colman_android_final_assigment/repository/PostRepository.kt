@@ -39,10 +39,20 @@ class PostRepository(context: Context) {
      */
     suspend fun refreshUserPosts(userId: String): Resource<Unit> {
         return try {
-            val snapshot = firestore.collection("posts")
+
+            var snapshot = firestore.collection("posts")
                 .whereEqualTo("userId", userId)
                 .get()
                 .await()
+            
+            if (snapshot.isEmpty) {
+                val userRef = firestore.collection("users").document(userId)
+                snapshot = firestore.collection("posts")
+                    .whereEqualTo("userId", userRef)
+                    .get()
+                    .await()
+            }
+
             val posts = mapSnapshotToPosts(snapshot)
             // Insert or update user's posts in the cache
             postDao.insertAll(posts)

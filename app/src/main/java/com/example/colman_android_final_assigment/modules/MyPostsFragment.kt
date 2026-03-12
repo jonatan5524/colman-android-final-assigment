@@ -15,6 +15,7 @@ class MyPostsFragment : Fragment() {
     private var _binding: FragmentMyPostsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: MyPostsViewModel by viewModels()
+    private lateinit var adapter: MyPostsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,16 +33,16 @@ class MyPostsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        adapter = MyPostsAdapter()
         binding.myPostsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
-            // Adapter will be initialized here later
+            this.adapter = this@MyPostsFragment.adapter
         }
     }
 
     private fun observeViewModel() {
         viewModel.myPosts.observe(viewLifecycleOwner) { posts ->
-            // Update adapter list here
-            // adapter.submitList(posts)
+            adapter.submitList(posts)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
