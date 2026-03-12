@@ -1,15 +1,27 @@
 package com.example.colman_android_final_assigment.modules
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.colman_android_final_assigment.R
 import com.example.colman_android_final_assigment.base.Resource
+import com.example.colman_android_final_assigment.data.remote.CityApiService
 import com.example.colman_android_final_assigment.databinding.FragmentFeedBinding
 import com.example.colman_android_final_assigment.viewmodel.FeedViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FeedFragment : Fragment() {
 
@@ -18,6 +30,9 @@ class FeedFragment : Fragment() {
 
     private val viewModel: FeedViewModel by viewModels()
     private lateinit var adapter: PostsAdapter
+
+    /** Cached city-id → city-name map for the filter dialog */
+    private var cityIdToNameMap: Map<Int, String> = emptyMap()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,6 +46,8 @@ class FeedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupSearchBar()
+        setupFilterButton()
         observeViewModel()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
@@ -38,15 +55,199 @@ class FeedFragment : Fragment() {
         }
     }
 
+    /* ------------------------------------------------------------------ */
+    /*  RecyclerView                                                       */
+    /* ------------------------------------------------------------------ */
+
     private fun setupRecyclerView() {
         adapter = PostsAdapter()
         binding.feedRecyclerView.adapter = adapter
     }
 
+    /* ------------------------------------------------------------------ */
+    /*  Search bar (free-text, 400 ms debounce handled in VM)              */
+    /* ------------------------------------------------------------------ */
+
+    private fun setupSearchBar() {
+        // Restore persisted query so the EditText stays in sync after config-change
+        binding.searchEditText.setText(viewModel.searchQuery.value ?: "")
+        binding.searchEditText.setSelection(binding.searchEditText.text?.length ?: 0)
+
+        binding.searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.setSearchQuery(s?.toString() ?: "")
+            }
+        })
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Filter button → Material dialog with Category + City spinners      */
+    /* ------------------------------------------------------------------ */
+
+    private fun setupFilterButton() {
+        binding.filterButton.setOnClickListener {
+            showFilterDialog()
+        }
+    }
+
+    private fun showFilterDialog() {
+        val cityIds = viewModel.availableCityIds.value ?: emptyList()
+
+        // Show the dialog immediately using cached names or fallbacks
+        buildFilterDialog(cityIds)
+
+        // Asynchronously prefetch a limited number of city names to keep UI responsive
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val limitedCityIds = cityIds.take(20)
+            CityApiService.prefetchCities(limitedCityIds)
+            val updatedMap = limitedCityIds.associateWith { CityApiService.getCityNameById(it) }
+            withContext(Dispatchers.Main) {
+                cityIdToNameMap = cityIdToNameMap + updatedMap
+            }
+        }
+    }
+
+    private fun buildFilterDialog(cityIds: List<Int>) {
+        val context = requireContext()
+
+        /* --- Category data --- */
+        val categories = viewModel.availableCategories.value ?: emptyList()
+        val selectedCategories = (viewModel.selectedCategories.value ?: emptyList()).toMutableSet()
+
+        /* --- City data --- */
+        val cityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
+        val selectedCityIds = (viewModel.selectedCityIds.value ?: emptyList()).toMutableSet()
+
+        /* --- Build dialog layout programmatically --- */
+        val padding = (24 * resources.displayMetrics.density).toInt()
+        val dropdownBg = ContextCompat.getDrawable(context, R.drawable.bg_input)
+
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding / 2, padding, 0)
+        }
+
+        // Helper to format summary text for a dropdown
+        fun summaryText(selected: Collection<String>, allLabel: String): String {
+            return when {
+                selected.isEmpty() -> allLabel
+                selected.size == 1 -> selected.first()
+                else -> "${selected.size} selected"
+            }
+        }
+
+        // ── Category label + dropdown trigger ──
+        val categoryLabel = TextView(context).apply {
+            text = getString(R.string.filter_label_category)
+            setTextColor(ContextCompat.getColor(context, R.color.text_dark))
+            textSize = 14f
+        }
+        val categoryDropdown = TextView(context).apply {
+            text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+            setTextColor(ContextCompat.getColor(context, R.color.text_dark))
+            textSize = 14f
+            background = dropdownBg?.constantState?.newDrawable()?.mutate()
+            setPadding(padding / 2, padding / 3, padding / 2, padding / 3)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
+            compoundDrawablePadding = 8
+        }
+        categoryDropdown.setOnClickListener {
+            val items = categories.toTypedArray()
+            val checked = BooleanArray(items.size) { items[it] in selectedCategories }
+            MaterialAlertDialogBuilder(context)
+                .setTitle(getString(R.string.filter_label_category))
+                .setMultiChoiceItems(items, checked) { _, which, isChecked ->
+                    if (isChecked) selectedCategories.add(items[which])
+                    else selectedCategories.remove(items[which])
+                }
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    categoryDropdown.text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+                    d.dismiss()
+                }
+                .show()
+        }
+        container.addView(categoryLabel)
+        container.addView(categoryDropdown)
+
+        // Spacer
+        container.addView(View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, (12 * resources.displayMetrics.density).toInt()
+            )
+        })
+
+        // ── City label + dropdown trigger ──
+        val cityLabel = TextView(context).apply {
+            text = getString(R.string.filter_label_city)
+            setTextColor(ContextCompat.getColor(context, R.color.text_dark))
+            textSize = 14f
+        }
+        val selectedCityNames = selectedCityIds.mapNotNull { id ->
+            cityIdToNameMap[id]
+        }
+        val cityDropdown = TextView(context).apply {
+            text = summaryText(selectedCityNames, getString(R.string.filter_all_cities))
+            setTextColor(ContextCompat.getColor(context, R.color.text_dark))
+            textSize = 14f
+            background = dropdownBg?.constantState?.newDrawable()?.mutate()
+            setPadding(padding / 2, padding / 3, padding / 2, padding / 3)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
+            compoundDrawablePadding = 8
+        }
+        cityDropdown.setOnClickListener {
+            val items = cityNames.toTypedArray()
+            val checked = BooleanArray(items.size) { cityIds[it] in selectedCityIds }
+            MaterialAlertDialogBuilder(context)
+                .setTitle(getString(R.string.filter_label_city))
+                .setMultiChoiceItems(items, checked) { _, which, isChecked ->
+                    if (isChecked) selectedCityIds.add(cityIds[which])
+                    else selectedCityIds.remove(cityIds[which])
+                }
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    val updatedNames = selectedCityIds.mapNotNull { id -> cityIdToNameMap[id] }
+                    cityDropdown.text = summaryText(updatedNames, getString(R.string.filter_all_cities))
+                    d.dismiss()
+                }
+                .show()
+        }
+        container.addView(cityLabel)
+        container.addView(cityDropdown)
+
+        /* --- Show main filter dialog --- */
+        MaterialAlertDialogBuilder(context)
+            .setTitle(getString(R.string.filter_dialog_title))
+            .setView(container)
+            .setPositiveButton(getString(R.string.filter_action_apply)) { dialog, _ ->
+                viewModel.setCategories(selectedCategories.toList())
+                viewModel.setCityIds(selectedCityIds.toList())
+                dialog.dismiss()
+            }
+            .setNeutralButton(getString(R.string.filter_action_reset)) { dialog, _ ->
+                viewModel.resetFilters()
+                binding.searchEditText.text?.clear()
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.filter_action_cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Observers                                                          */
+    /* ------------------------------------------------------------------ */
+
     private fun observeViewModel() {
-        viewModel.allPosts.observe(viewLifecycleOwner) { posts ->
+        // Observe filtered posts (replaces the old allPosts observer)
+        viewModel.filteredPosts.observe(viewLifecycleOwner) { posts ->
             adapter.submitList(posts)
         }
+
+        // Keep categories & city IDs alive so .value is populated for the filter dialog
+        viewModel.availableCategories.observe(viewLifecycleOwner) { /* no-op */ }
+        viewModel.availableCityIds.observe(viewLifecycleOwner) { /* no-op */ }
 
         viewModel.refreshState.observe(viewLifecycleOwner) { state ->
             when (state) {

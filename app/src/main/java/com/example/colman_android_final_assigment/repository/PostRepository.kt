@@ -13,8 +13,30 @@ class PostRepository(context: Context) {
     private val firestore get() = FirebaseFirestore.getInstance()
     private val postDao = AppLocalDb.getDatabase(context).postDao()
 
-    /** LiveData observed by the UI - sourced from local Room cache */
-    fun getAllPostsLiveData(): LiveData<List<Post>> = postDao.getAllPosts()
+    /** Filtered posts: free-text search + multi-select category/city filter */
+    fun getFilteredPostsMultiLiveData(
+        query: String,
+        categories: List<String>,
+        cityIds: List<Int>
+    ): LiveData<List<Post>> {
+        return if (query.isBlank() && categories.isEmpty() && cityIds.isEmpty()) {
+            postDao.getAllPosts()
+        } else {
+            postDao.searchAndFilterMulti(
+                query = query,
+                categories = categories.ifEmpty { listOf("") },
+                noCategories = if (categories.isEmpty()) 1 else 0,
+                cityIds = cityIds.ifEmpty { listOf(-1) },
+                noCities = if (cityIds.isEmpty()) 1 else 0
+            )
+        }
+    }
+
+    /** All unique categories from the local cache */
+    fun getAllCategoriesLiveData(): LiveData<List<String>> = postDao.getAllCategories()
+
+    /** All unique city IDs from the local cache */
+    fun getAllCityIdsLiveData(): LiveData<List<Int>> = postDao.getAllCityIds()
 
     /**
      * Fetch all posts from Firestore and refresh the local Room cache.

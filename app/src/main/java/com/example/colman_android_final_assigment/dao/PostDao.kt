@@ -23,5 +23,30 @@ interface PostDao {
 
     @Query("DELETE FROM posts")
     suspend fun clearAll()
+
+    /** Combined search + multi-select category AND city filter */
+    @Query("""
+        SELECT * FROM posts 
+        WHERE (LOWER(title) LIKE '%' || LOWER(:query) || '%' 
+            OR LOWER(description) LIKE '%' || LOWER(:query) || '%')
+        AND (:noCategories = 1 OR category IN (:categories))
+        AND (:noCities = 1 OR cityId IN (:cityIds))
+        ORDER BY title ASC
+    """)
+    fun searchAndFilterMulti(
+        query: String,
+        categories: List<String>,
+        noCategories: Int,
+        cityIds: List<Int>,
+        noCities: Int
+    ): LiveData<List<Post>>
+
+    /** All unique categories currently in the cache */
+    @Query("SELECT DISTINCT category FROM posts WHERE category != '' ORDER BY category ASC")
+    fun getAllCategories(): LiveData<List<String>>
+
+    /** All unique city IDs currently in the cache */
+    @Query("SELECT DISTINCT cityId FROM posts ORDER BY cityId ASC")
+    fun getAllCityIds(): LiveData<List<Int>>
 }
 
