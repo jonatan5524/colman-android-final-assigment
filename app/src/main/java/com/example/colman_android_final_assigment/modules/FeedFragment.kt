@@ -98,11 +98,9 @@ class FeedFragment : Fragment() {
         val cityIds = viewModel.availableCityIds.value ?: emptyList()
 
         // Pre-fetch city names, then open the dialog
-        binding.feedProgressBar.visibility = View.VISIBLE
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) { CityApiService.prefetchCities(cityIds) }
             cityIdToNameMap = cityIds.associateWith { CityApiService.getCityNameById(it) }
-            binding.feedProgressBar.visibility = View.GONE
             buildFilterDialog(cityIds)
         }
     }
