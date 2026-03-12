@@ -12,6 +12,9 @@ interface PostDao {
     @Query("SELECT * FROM posts WHERE userId = :userId ORDER BY title ASC")
     fun getPostsByUser(userId: String): LiveData<List<Post>>
 
+    @Query("SELECT * FROM posts WHERE id = :postId")
+    fun getPostById(postId: String): LiveData<Post?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(posts: List<Post>)
 

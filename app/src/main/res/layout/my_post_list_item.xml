@@ -115,6 +115,17 @@
                 android:textSize="12sp" />
 
             <ImageButton
+                android:id="@+id/edit_post_button"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_input"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings"
+                app:tint="@color/theme_text_primary" />
+
+            <ImageButton
                 android:id="@+id/delete_post_button"
                 android:layout_width="32dp"
                 android:layout_height="32dp"

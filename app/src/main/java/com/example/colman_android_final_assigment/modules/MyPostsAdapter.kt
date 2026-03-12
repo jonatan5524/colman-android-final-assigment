@@ -13,7 +13,8 @@ import com.squareup.picasso.Picasso
 
 class MyPostsAdapter(
     private val onToggleStatus: (Post) -> Unit,
-    private val onDelete: (Post) -> Unit
+    private val onDelete: (Post) -> Unit,
+    private val onEdit: (Post) -> Unit
 ) : ListAdapter<Post, MyPostsAdapter.ViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,6 +44,7 @@ class MyPostsAdapter(
 
             binding.markAsGivenButton.setOnClickListener { onToggleStatus(post) }
             binding.deletePostButton.setOnClickListener { onDelete(post) }
+            binding.editPostButton.setOnClickListener { onEdit(post) }
         }
     }
 

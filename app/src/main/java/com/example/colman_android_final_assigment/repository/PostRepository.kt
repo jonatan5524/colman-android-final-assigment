@@ -1,11 +1,13 @@
 package com.example.colman_android_final_assigment.repository
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.database.AppLocalDb
 import com.example.colman_android_final_assigment.model.Post
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
 class PostRepository(context: Context) {
@@ -18,6 +20,9 @@ class PostRepository(context: Context) {
 
     /** LiveData for current user's posts */
     fun getPostsByUser(userId: String): LiveData<List<Post>> = postDao.getPostsByUser(userId)
+
+    /** LiveData for a single post */
+    fun getPostById(postId: String): LiveData<Post?> = postDao.getPostById(postId)
 
     /**
      * Fetch all posts from Firestore and refresh the local Room cache.
@@ -39,12 +44,13 @@ class PostRepository(context: Context) {
      */
     suspend fun refreshUserPosts(userId: String): Resource<Unit> {
         return try {
-
+            // Try querying by String first
             var snapshot = firestore.collection("posts")
                 .whereEqualTo("userId", userId)
                 .get()
                 .await()
             
+            // If empty, try querying by DocumentReference (common Firestore pattern)
             if (snapshot.isEmpty) {
                 val userRef = firestore.collection("users").document(userId)
                 snapshot = firestore.collection("posts")
@@ -59,6 +65,19 @@ class PostRepository(context: Context) {
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Failed to refresh your posts")
+        }
+    }
+
+    suspend fun refreshPost(postId: String): Resource<Unit> {
+        return try {
+            val doc = firestore.collection("posts").document(postId).get().await()
+            val post = mapDocumentToPost(doc)
+            if (post != null) {
+                postDao.insertPost(post)
+            }
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to refresh post")
         }
     }
 
@@ -88,24 +107,63 @@ class PostRepository(context: Context) {
         }
     }
 
-    private fun mapSnapshotToPosts(snapshot: com.google.firebase.firestore.QuerySnapshot): List<Post> {
-        return snapshot.documents.mapNotNull { doc ->
-            val userId = when (val ref = doc.get("userId")) {
-                is com.google.firebase.firestore.DocumentReference -> ref.id
-                is String -> ref
-                else -> ""
-            }
-            Post(
-                id = doc.id,
-                title = doc.getString("title") ?: "",
-                description = doc.getString("description") ?: "",
-                category = doc.getString("category") ?: "",
-                cityId = (doc.getLong("cityId") ?: 0L).toInt(),
-                imageUrl = doc.getString("imageUrl") ?: "",
-                isTaken = doc.getBoolean("isTaken") ?: false,
-                userId = userId
+    suspend fun updatePost(
+        postId: String,
+        title: String,
+        description: String,
+        category: String,
+        cityId: Int,
+        imageUri: Uri?
+    ): Resource<Unit> {
+        return try {
+            val storage = FirebaseStorage.getInstance()
+            val updates = mutableMapOf<String, Any>(
+                "title" to title,
+                "description" to description,
+                "category" to category,
+                "cityId" to cityId
             )
+
+            if (imageUri != null) {
+                val ref = storage.reference.child("posts/$postId.jpg")
+                ref.putFile(imageUri).await()
+                val imageUrl = ref.downloadUrl.await().toString()
+                updates["imageUrl"] = imageUrl
+            }
+
+            firestore.collection("posts").document(postId).update(updates).await()
+            
+            // Refresh local cache
+            refreshPost(postId)
+
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to update post")
         }
     }
-}
 
+    private fun mapSnapshotToPosts(snapshot: com.google.firebase.firestore.QuerySnapshot): List<Post> {
+        return snapshot.documents.mapNotNull { doc ->
+            mapDocumentToPost(doc)
+        }
+    }
+
+    private fun mapDocumentToPost(doc: com.google.firebase.firestore.DocumentSnapshot): Post? {
+        if (!doc.exists()) return null
+        val userId = when (val ref = doc.get("userId")) {
+            is com.google.firebase.firestore.DocumentReference -> ref.id
+            is String -> ref
+            else -> ""
+        }
+        return Post(
+            id = doc.id,
+            title = doc.getString("title") ?: "",
+            description = doc.getString("description") ?: "",
+            category = doc.getString("category") ?: "",
+            cityId = (doc.getLong("cityId") ?: 0L).toInt(),
+            imageUrl = doc.getString("imageUrl") ?: "",
+            isTaken = doc.getBoolean("isTaken") ?: false,
+            userId = userId
+        )
+    }
+}
