@@ -6,4 +6,11 @@
     <string name="location_icon_description">Location icon</string>
     <string name="filter_label_category">Category</string>
     <string name="filter_label_city">City</string>
+    <string name="filter_all_categories">All Categories</string>
+    <string name="filter_all_cities">All Cities</string>
+    <string name="filter_dialog_title">Filter Posts</string>
+    <string name="filter_action_apply">Apply</string>
+    <string name="filter_action_reset">Reset</string>
+    <string name="filter_action_cancel">Cancel</string>
+    <string name="filter_city_fallback">City #%d</string>
 </resources>

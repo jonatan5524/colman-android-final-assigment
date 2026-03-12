@@ -11,7 +11,7 @@ import android.widget.Spinner
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.example.colman_android_final_assigment.R
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.data.remote.CityApiService
@@ -30,7 +30,7 @@ class FeedFragment : Fragment() {
     private var _binding: FragmentFeedBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FeedViewModel by activityViewModels()
+    private val viewModel: FeedViewModel by viewModels()
     private lateinit var adapter: PostsAdapter
 
     /** Cached city-id → city-name map for the filter dialog */
@@ -111,15 +111,15 @@ class FeedFragment : Fragment() {
         val context = requireContext()
 
         /* --- Category spinner data --- */
-        val categories = listOf("All Categories") +
+        val categories = listOf(getString(R.string.filter_all_categories)) +
                 (viewModel.availableCategories.value ?: emptyList())
         val currentCategory = viewModel.selectedCategory.value
         val categoryIndex = if (currentCategory == null) 0
         else categories.indexOf(currentCategory).coerceAtLeast(0)
 
         /* --- City spinner data --- */
-        val cityNames = listOf("All Cities") +
-                cityIds.map { cityIdToNameMap[it] ?: "City #$it" }
+        val cityNames = listOf(getString(R.string.filter_all_cities)) +
+                cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
         val cityValues = listOf(null) + cityIds
         val currentCityId = viewModel.selectedCityId.value
         val cityIndex = cityValues.indexOf(currentCityId).coerceAtLeast(0)
@@ -160,9 +160,9 @@ class FeedFragment : Fragment() {
 
         /* --- Show dialog --- */
         MaterialAlertDialogBuilder(context)
-            .setTitle("Filter Posts")
+            .setTitle(getString(R.string.filter_dialog_title))
             .setView(container)
-            .setPositiveButton("Apply") { dialog, _ ->
+            .setPositiveButton(getString(R.string.filter_action_apply)) { dialog, _ ->
                 val selectedCatPos = categorySpinner.selectedItemPosition
                 val selectedCityPos = citySpinner.selectedItemPosition
 
@@ -173,12 +173,12 @@ class FeedFragment : Fragment() {
                 viewModel.setCity(city)
                 dialog.dismiss()
             }
-            .setNeutralButton("Reset") { dialog, _ ->
+            .setNeutralButton(getString(R.string.filter_action_reset)) { dialog, _ ->
                 viewModel.resetFilters()
                 binding.searchEditText.text?.clear()
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(getString(R.string.filter_action_cancel)) { dialog, _ ->
                 dialog.dismiss()
             }
             .show()
