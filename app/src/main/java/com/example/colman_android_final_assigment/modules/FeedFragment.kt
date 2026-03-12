@@ -120,7 +120,7 @@ class FeedFragment : Fragment() {
         /* --- City spinner data --- */
         val cityNames = listOf("All Cities") +
                 cityIds.map { cityIdToNameMap[it] ?: "City #$it" }
-        val cityValues: List<Int?> = listOf(null) + cityIds
+        val cityValues = listOf(null) + cityIds
         val currentCityId = viewModel.selectedCityId.value
         val cityIndex = cityValues.indexOf(currentCityId).coerceAtLeast(0)
 
@@ -193,6 +193,10 @@ class FeedFragment : Fragment() {
         viewModel.filteredPosts.observe(viewLifecycleOwner) { posts ->
             adapter.submitList(posts)
         }
+
+        // Keep categories & city IDs alive so .value is populated for the filter dialog
+        viewModel.availableCategories.observe(viewLifecycleOwner) { /* no-op */ }
+        viewModel.availableCityIds.observe(viewLifecycleOwner) { /* no-op */ }
 
         viewModel.refreshState.observe(viewLifecycleOwner) { state ->
             when (state) {
