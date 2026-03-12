@@ -95,11 +95,17 @@ class FeedFragment : Fragment() {
     private fun showFilterDialog() {
         val cityIds = viewModel.availableCityIds.value ?: emptyList()
 
-        // Pre-fetch city names, then open the dialog
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) { CityApiService.prefetchCities(cityIds) }
-            cityIdToNameMap = cityIds.associateWith { CityApiService.getCityNameById(it) }
-            buildFilterDialog(cityIds)
+        // Show the dialog immediately using cached names or fallbacks
+        buildFilterDialog(cityIds)
+
+        // Asynchronously prefetch a limited number of city names to keep UI responsive
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val limitedCityIds = cityIds.take(20)
+            CityApiService.prefetchCities(limitedCityIds)
+            val updatedMap = limitedCityIds.associateWith { CityApiService.getCityNameById(it) }
+            withContext(Dispatchers.Main) {
+                cityIdToNameMap = cityIdToNameMap + updatedMap
+            }
         }
     }
 
