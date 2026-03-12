@@ -6,8 +6,6 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Spinner
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -108,67 +106,116 @@ class FeedFragment : Fragment() {
     private fun buildFilterDialog(cityIds: List<Int>) {
         val context = requireContext()
 
-        /* --- Category spinner data --- */
-        val categories = listOf(getString(R.string.filter_all_categories)) +
-                (viewModel.availableCategories.value ?: emptyList())
-        val currentCategory = viewModel.selectedCategory.value
-        val categoryIndex = if (currentCategory == null) 0
-        else categories.indexOf(currentCategory).coerceAtLeast(0)
+        /* --- Category data --- */
+        val categories = viewModel.availableCategories.value ?: emptyList()
+        val selectedCategories = (viewModel.selectedCategories.value ?: emptyList()).toMutableSet()
 
-        /* --- City spinner data --- */
-        val cityNames = listOf(getString(R.string.filter_all_cities)) +
-                cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
-        val cityValues = listOf(null) + cityIds
-        val currentCityId = viewModel.selectedCityId.value
-        val cityIndex = cityValues.indexOf(currentCityId).coerceAtLeast(0)
+        /* --- City data --- */
+        val cityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
+        val selectedCityIds = (viewModel.selectedCityIds.value ?: emptyList()).toMutableSet()
 
         /* --- Build dialog layout programmatically --- */
         val padding = (24 * resources.displayMetrics.density).toInt()
+        val dropdownBg = ContextCompat.getDrawable(context, R.drawable.bg_input)
 
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(padding, padding / 2, padding, 0)
         }
 
-        // Category label + spinner
+        // Helper to format summary text for a dropdown
+        fun summaryText(selected: Collection<String>, allLabel: String): String {
+            return when {
+                selected.isEmpty() -> allLabel
+                selected.size == 1 -> selected.first()
+                else -> "${selected.size} selected"
+            }
+        }
+
+        // ── Category label + dropdown trigger ──
         val categoryLabel = TextView(context).apply {
             text = getString(R.string.filter_label_category)
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
             textSize = 14f
         }
-        val categorySpinner = Spinner(context).apply {
-            adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, categories)
-            setSelection(categoryIndex)
+        val categoryDropdown = TextView(context).apply {
+            text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+            setTextColor(ContextCompat.getColor(context, R.color.text_dark))
+            textSize = 14f
+            background = dropdownBg?.constantState?.newDrawable()?.mutate()
+            setPadding(padding / 2, padding / 3, padding / 2, padding / 3)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, android.R.drawable.arrow_down_float, 0)
+            compoundDrawablePadding = 8
+        }
+        categoryDropdown.setOnClickListener {
+            val items = categories.toTypedArray()
+            val checked = BooleanArray(items.size) { items[it] in selectedCategories }
+            MaterialAlertDialogBuilder(context)
+                .setTitle(getString(R.string.filter_label_category))
+                .setMultiChoiceItems(items, checked) { _, which, isChecked ->
+                    if (isChecked) selectedCategories.add(items[which])
+                    else selectedCategories.remove(items[which])
+                }
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    categoryDropdown.text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+                    d.dismiss()
+                }
+                .show()
         }
         container.addView(categoryLabel)
-        container.addView(categorySpinner)
+        container.addView(categoryDropdown)
 
-        // City label + spinner
+        // Spacer
+        container.addView(View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, (12 * resources.displayMetrics.density).toInt()
+            )
+        })
+
+        // ── City label + dropdown trigger ──
         val cityLabel = TextView(context).apply {
             text = getString(R.string.filter_label_city)
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
             textSize = 14f
         }
-        val citySpinner = Spinner(context).apply {
-            adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, cityNames)
-            setSelection(cityIndex)
+        val selectedCityNames = selectedCityIds.mapNotNull { id ->
+            cityIdToNameMap[id]
+        }
+        val cityDropdown = TextView(context).apply {
+            text = summaryText(selectedCityNames, getString(R.string.filter_all_cities))
+            setTextColor(ContextCompat.getColor(context, R.color.text_dark))
+            textSize = 14f
+            background = dropdownBg?.constantState?.newDrawable()?.mutate()
+            setPadding(padding / 2, padding / 3, padding / 2, padding / 3)
+            setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, android.R.drawable.arrow_down_float, 0)
+            compoundDrawablePadding = 8
+        }
+        cityDropdown.setOnClickListener {
+            val items = cityNames.toTypedArray()
+            val checked = BooleanArray(items.size) { cityIds[it] in selectedCityIds }
+            MaterialAlertDialogBuilder(context)
+                .setTitle(getString(R.string.filter_label_city))
+                .setMultiChoiceItems(items, checked) { _, which, isChecked ->
+                    if (isChecked) selectedCityIds.add(cityIds[which])
+                    else selectedCityIds.remove(cityIds[which])
+                }
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    val updatedNames = selectedCityIds.mapNotNull { id -> cityIdToNameMap[id] }
+                    cityDropdown.text = summaryText(updatedNames, getString(R.string.filter_all_cities))
+                    d.dismiss()
+                }
+                .show()
         }
         container.addView(cityLabel)
-        container.addView(citySpinner)
+        container.addView(cityDropdown)
 
-        /* --- Show dialog --- */
+        /* --- Show main filter dialog --- */
         MaterialAlertDialogBuilder(context)
             .setTitle(getString(R.string.filter_dialog_title))
             .setView(container)
             .setPositiveButton(getString(R.string.filter_action_apply)) { dialog, _ ->
-                val selectedCatPos = categorySpinner.selectedItemPosition
-                val selectedCityPos = citySpinner.selectedItemPosition
-
-                val cat = if (selectedCatPos == 0) null else categories[selectedCatPos]
-                val city = cityValues[selectedCityPos]
-
-                viewModel.setCategory(cat)
-                viewModel.setCity(city)
+                viewModel.setCategories(selectedCategories.toList())
+                viewModel.setCityIds(selectedCityIds.toList())
                 dialog.dismiss()
             }
             .setNeutralButton(getString(R.string.filter_action_reset)) { dialog, _ ->

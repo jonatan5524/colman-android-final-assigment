@@ -22,11 +22,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _searchQuery = MutableLiveData("")
     val searchQuery: LiveData<String> = _searchQuery
 
-    private val _selectedCategory = MutableLiveData<String?>(null)
-    val selectedCategory: LiveData<String?> = _selectedCategory
+    private val _selectedCategories = MutableLiveData<List<String>>(emptyList())
+    val selectedCategories: LiveData<List<String>> = _selectedCategories
 
-    private val _selectedCityId = MutableLiveData<Int?>(null)
-    val selectedCityId: LiveData<Int?> = _selectedCityId
+    private val _selectedCityIds = MutableLiveData<List<Int>>(emptyList())
+    val selectedCityIds: LiveData<List<Int>> = _selectedCityIds
 
     /** Internal debounced query – drives the actual Room lookup. */
     private val _debouncedQuery = MutableLiveData("")
@@ -37,7 +37,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     /** Filtered posts – observed by the adapter */
     val filteredPosts: LiveData<List<Post>> = _debouncedQuery.switchMap { query ->
-        repository.getFilteredPostsLiveData(query, _selectedCategory.value, _selectedCityId.value)
+        repository.getFilteredPostsMultiLiveData(
+            query,
+            _selectedCategories.value ?: emptyList(),
+            _selectedCityIds.value ?: emptyList()
+        )
     }
 
     /** Dynamic list of categories currently in cache */
@@ -74,23 +78,23 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Set category filter (null = all categories). */
-    fun setCategory(category: String?) {
-        _selectedCategory.value = category
+    /** Set categories filter (empty list = all categories). */
+    fun setCategories(categories: List<String>) {
+        _selectedCategories.value = categories
         reapplyFilter()
     }
 
-    /** Set city filter by ID (null = all cities). */
-    fun setCity(cityId: Int?) {
-        _selectedCityId.value = cityId
+    /** Set city IDs filter (empty list = all cities). */
+    fun setCityIds(cityIds: List<Int>) {
+        _selectedCityIds.value = cityIds
         reapplyFilter()
     }
 
     /** Clear all filters and the search bar text. */
     fun resetFilters() {
         _searchQuery.value = ""
-        _selectedCategory.value = null
-        _selectedCityId.value = null
+        _selectedCategories.value = emptyList()
+        _selectedCityIds.value = emptyList()
         debounceJob?.cancel()
         debounceJob = null
         _debouncedQuery.value = ""
