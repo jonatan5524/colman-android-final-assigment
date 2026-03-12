@@ -128,7 +128,11 @@ class FeedFragment : Fragment() {
             return when {
                 selected.isEmpty() -> allLabel
                 selected.size == 1 -> selected.first()
-                else -> "${selected.size} selected"
+                else -> resources.getQuantityString(
+                    R.plurals.filter_selected_count,
+                    selected.size,
+                    selected.size
+                )
             }
         }
 
