@@ -15,6 +15,12 @@ interface PostDao {
     @Query("SELECT * FROM posts WHERE id = :postId")
     fun getPostById(postId: String): LiveData<Post?>
 
+    @Query("SELECT COUNT(*) FROM posts WHERE userId = :userId")
+    fun getPostCountByUser(userId: String): LiveData<Int>
+
+    @Query("SELECT COUNT(*) FROM posts WHERE userId = :userId AND isTaken = 1")
+    fun getGivenCountByUser(userId: String): LiveData<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(posts: List<Post>)
 

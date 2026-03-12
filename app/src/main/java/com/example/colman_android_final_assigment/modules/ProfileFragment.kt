@@ -44,6 +44,14 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        viewModel.postedCount.observe(viewLifecycleOwner) { count ->
+            binding.itemsPostedCount.text = count.toString()
+        }
+
+        viewModel.givenCount.observe(viewLifecycleOwner) { count ->
+            binding.itemsGivenCount.text = count.toString()
+        }
+
         binding.editProfileLink.setOnClickListener {
             val name = binding.profileName.text.toString()
             val action = ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment(

@@ -24,6 +24,12 @@ class PostRepository(context: Context) {
     /** LiveData for a single post */
     fun getPostById(postId: String): LiveData<Post?> = postDao.getPostById(postId)
 
+    /** LiveData for total post count of a user */
+    fun getPostCountByUser(userId: String): LiveData<Int> = postDao.getPostCountByUser(userId)
+
+    /** LiveData for given post count of a user */
+    fun getGivenCountByUser(userId: String): LiveData<Int> = postDao.getGivenCountByUser(userId)
+
     /**
      * Fetch all posts from Firestore and refresh the local Room cache.
      */
