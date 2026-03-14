@@ -17,7 +17,6 @@ import androidx.navigation.fragment.navArgs
 import com.example.colman_android_final_assigment.R
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.databinding.FragmentEditPostBinding
-import com.example.colman_android_final_assigment.utils.Constants
 import com.example.colman_android_final_assigment.viewmodel.EditPostViewModel
 import com.squareup.picasso.Picasso
 
@@ -35,7 +34,7 @@ class EditPostFragment : Fragment() {
         }
     }
 
-    private val cityNames = Constants.getCityNames()
+    private val cities = arrayOf("Tel Aviv", "Haifa", "Jerusalem", "Beersheba", "Eilat")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,21 +84,20 @@ class EditPostFragment : Fragment() {
         val title = binding.editTitleEditText.text.toString().trim()
         val description = binding.editDescriptionEditText.text.toString().trim()
         val category = binding.editCategoryEditText.text.toString().trim()
-        val selectedCityName = binding.editCitySpinner.selectedItem.toString()
-        val cityId = Constants.getCityIdByName(selectedCityName)
+        val cityId = binding.editCitySpinner.selectedItemPosition
 
         var isValid = true
 
         if (title.isEmpty()) {
-            binding.editTitleLayout.error = getString(R.string.error_empty_title)
+            binding.editTitleLayout.error = "Title is required"
             isValid = false
         }
         if (description.isEmpty()) {
-            binding.editDescriptionLayout.error = getString(R.string.error_empty_description)
+            binding.editDescriptionLayout.error = "Description is required"
             isValid = false
         }
         if (category.isEmpty()) {
-            binding.editCategoryLayout.error = getString(R.string.error_empty_category)
+            binding.editCategoryLayout.error = "Category is required"
             isValid = false
         }
 
@@ -109,7 +107,7 @@ class EditPostFragment : Fragment() {
     }
 
     private fun setupCitySpinner() {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cityNames)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cities)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.editCitySpinner.adapter = adapter
     }
@@ -121,10 +119,8 @@ class EditPostFragment : Fragment() {
                 binding.editDescriptionEditText.setText(it.description)
                 binding.editCategoryEditText.setText(it.category)
                 
-                val currentCityName = Constants.getCityNameById(it.cityId)
-                val cityIndex = cityNames.indexOf(currentCityName)
-                if (cityIndex != -1) {
-                    binding.editCitySpinner.setSelection(cityIndex)
+                if (it.cityId in cities.indices) {
+                    binding.editCitySpinner.setSelection(it.cityId)
                 } else {
                     binding.editCitySpinner.setSelection(0)
                 }
