@@ -17,6 +17,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.colman_android_final_assigment.R
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.databinding.FragmentEditPostBinding
+import com.example.colman_android_final_assigment.utils.Constants
 import com.example.colman_android_final_assigment.viewmodel.EditPostViewModel
 import com.squareup.picasso.Picasso
 
@@ -34,7 +35,7 @@ class EditPostFragment : Fragment() {
         }
     }
 
-    private val cities = arrayOf("Tel Aviv", "Haifa", "Jerusalem", "Beersheba", "Eilat")
+    private val cityNames = Constants.getCityNames()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -84,7 +85,8 @@ class EditPostFragment : Fragment() {
         val title = binding.editTitleEditText.text.toString().trim()
         val description = binding.editDescriptionEditText.text.toString().trim()
         val category = binding.editCategoryEditText.text.toString().trim()
-        val cityId = binding.editCitySpinner.selectedItemPosition
+        val selectedCityName = binding.editCitySpinner.selectedItem.toString()
+        val cityId = Constants.getCityIdByName(selectedCityName)
 
         var isValid = true
 
@@ -107,7 +109,7 @@ class EditPostFragment : Fragment() {
     }
 
     private fun setupCitySpinner() {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cities)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cityNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.editCitySpinner.adapter = adapter
     }
@@ -119,8 +121,10 @@ class EditPostFragment : Fragment() {
                 binding.editDescriptionEditText.setText(it.description)
                 binding.editCategoryEditText.setText(it.category)
                 
-                if (it.cityId in cities.indices) {
-                    binding.editCitySpinner.setSelection(it.cityId)
+                val currentCityName = Constants.getCityNameById(it.cityId)
+                val cityIndex = cityNames.indexOf(currentCityName)
+                if (cityIndex != -1) {
+                    binding.editCitySpinner.setSelection(cityIndex)
                 } else {
                     binding.editCitySpinner.setSelection(0)
                 }

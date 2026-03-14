@@ -57,7 +57,7 @@ class MyPostsFragment : Fragment() {
     }
 
     private fun showDeleteConfirmation(post: Post) {
-        AlertDialog.Builder(requireContext())
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.delete_dialog_title))
             .setMessage(getString(R.string.delete_dialog_message))
             .setPositiveButton(getString(R.string.delete_confirm)) { _, _ ->

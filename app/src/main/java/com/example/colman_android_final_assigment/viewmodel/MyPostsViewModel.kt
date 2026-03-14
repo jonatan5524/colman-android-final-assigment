@@ -19,7 +19,7 @@ class MyPostsViewModel(application: Application) : AndroidViewModel(application)
         MutableLiveData(emptyList())
     }
 
-    private val _isLoading = MutableLiveData<Boolean>()
+    private val _isLoading = MutableLiveData<Boolean>(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     private val _errorMessage = MutableLiveData<String?>()

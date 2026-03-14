@@ -33,6 +33,9 @@ interface PostDao {
     @Query("DELETE FROM posts")
     suspend fun clearAll()
 
+    @Query("DELETE FROM posts WHERE userId = :userId AND id NOT IN (:postIds)")
+    suspend fun deleteUserPostsNotInList(userId: String, postIds: List<String>)
+
     /** Combined search + multi-select category AND city filter */
     @Query("""
         SELECT * FROM posts 

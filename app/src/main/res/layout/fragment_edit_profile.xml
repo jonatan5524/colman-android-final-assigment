@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Cancel"
-        android:textColor="@color/text_gray"
+        android:textColor="@color/theme_text_secondary"
         app:layout_constraintTop_toBottomOf="@id/save_profile_button" />
 
     <ProgressBar

@@ -90,6 +90,13 @@ class PostRepository(context: Context) {
             val posts = mapSnapshotToPosts(snapshot)
             // Insert or update user's posts in the cache
             postDao.insertAll(posts)
+            
+            // REMOVE STALE DATA: Remove local posts for this user that are no longer in Firestore
+            val currentPostIds = posts.map { it.id }
+            if (currentPostIds.isNotEmpty()) {
+                postDao.deleteUserPostsNotInList(userId, currentPostIds)
+            }
+
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Failed to refresh your posts")
