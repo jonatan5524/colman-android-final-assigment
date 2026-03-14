@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.navigation.fragment.findNavController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.colman_android_final_assigment.R
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.databinding.FragmentMyPostsBinding
@@ -57,12 +58,12 @@ class MyPostsFragment : Fragment() {
 
     private fun showDeleteConfirmation(post: Post) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Delete Post")
-            .setMessage("Are you sure you want to delete this post?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle(getString(R.string.delete_dialog_title))
+            .setMessage(getString(R.string.delete_dialog_message))
+            .setPositiveButton(getString(R.string.delete_confirm)) { _, _ ->
                 viewModel.deletePost(post)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.filter_action_cancel), null)
             .show()
     }
 

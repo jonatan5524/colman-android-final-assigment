@@ -13,4 +13,12 @@
     <string name="filter_action_reset">Reset</string>
     <string name="filter_action_cancel">Cancel</string>
     <string name="filter_city_fallback">City #%d</string>
+    <string name="cd_delete_post">Delete this post</string>
+    <string name="cd_edit_post">Edit this post</string>
+    <string name="delete_dialog_title">Delete Post</string>
+    <string name="delete_dialog_message">Are you sure you want to delete this post? This action cannot be undone.</string>
+    <string name="delete_confirm">Delete</string>
+    <string name="error_empty_title">Title cannot be empty</string>
+    <string name="error_empty_description">Description cannot be empty</string>
+    <string name="error_empty_category">Category cannot be empty</string>
 </resources>

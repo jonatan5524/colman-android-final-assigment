@@ -78,6 +78,15 @@
                 android:text="Location"
                 android:textColor="@color/theme_text_secondary"
                 android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/city_loading_spinner"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="8dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
         </LinearLayout>
 
         <TextView
@@ -120,6 +129,7 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="12dp"
                 android:background="@drawable/bg_input"
+                android:contentDescription="@string/cd_edit_post"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_settings"
@@ -131,6 +141,7 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="12dp"
                 android:background="@drawable/bg_input"
+                android:contentDescription="@string/cd_delete_post"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_delete" />

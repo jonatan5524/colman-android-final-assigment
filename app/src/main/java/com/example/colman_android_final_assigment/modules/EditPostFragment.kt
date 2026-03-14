@@ -2,6 +2,8 @@ package com.example.colman_android_final_assigment.modules
 
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +48,7 @@ class EditPostFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupCitySpinner()
+        setupTextWatchers()
         viewModel.setPostId(args.postId)
         observeViewModel()
 
@@ -54,20 +57,52 @@ class EditPostFragment : Fragment() {
         }
 
         binding.savePostButton.setOnClickListener {
-            val title = binding.editTitleEditText.text.toString()
-            val description = binding.editDescriptionEditText.text.toString()
-            val category = binding.editCategoryEditText.text.toString()
-            val cityId = binding.editCitySpinner.selectedItemPosition
-
-            if (title.isNotEmpty() && description.isNotEmpty()) {
-                viewModel.savePost(title, description, category, cityId, imageUri)
-            } else {
-                Toast.makeText(context, "Please fill title and description", Toast.LENGTH_SHORT).show()
-            }
+            validateAndSave()
         }
 
         binding.cancelEditPostButton.setOnClickListener {
             findNavController().popBackStack()
+        }
+    }
+
+    private fun setupTextWatchers() {
+        val watcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.editTitleLayout.error = null
+                binding.editDescriptionLayout.error = null
+                binding.editCategoryLayout.error = null
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        }
+        binding.editTitleEditText.addTextChangedListener(watcher)
+        binding.editDescriptionEditText.addTextChangedListener(watcher)
+        binding.editCategoryEditText.addTextChangedListener(watcher)
+    }
+
+    private fun validateAndSave() {
+        val title = binding.editTitleEditText.text.toString().trim()
+        val description = binding.editDescriptionEditText.text.toString().trim()
+        val category = binding.editCategoryEditText.text.toString().trim()
+        val cityId = binding.editCitySpinner.selectedItemPosition
+
+        var isValid = true
+
+        if (title.isEmpty()) {
+            binding.editTitleLayout.error = getString(R.string.error_empty_title)
+            isValid = false
+        }
+        if (description.isEmpty()) {
+            binding.editDescriptionLayout.error = getString(R.string.error_empty_description)
+            isValid = false
+        }
+        if (category.isEmpty()) {
+            binding.editCategoryLayout.error = getString(R.string.error_empty_category)
+            isValid = false
+        }
+
+        if (isValid) {
+            viewModel.savePost(title, description, category, cityId, imageUri)
         }
     }
 
@@ -84,11 +119,9 @@ class EditPostFragment : Fragment() {
                 binding.editDescriptionEditText.setText(it.description)
                 binding.editCategoryEditText.setText(it.category)
                 
-                // Safety check for cityId range
                 if (it.cityId in cities.indices) {
                     binding.editCitySpinner.setSelection(it.cityId)
                 } else {
-                    // Default to first item if ID is invalid (like 5000)
                     binding.editCitySpinner.setSelection(0)
                 }
 
