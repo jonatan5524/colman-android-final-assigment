@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/theme_surface"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp">
 
@@ -28,7 +29,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/post_item_title_hint"
-            android:textColor="@color/text_dark"
+            android:textColor="@color/theme_text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -40,7 +41,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/post_item_category_hint"
-            android:textColor="@color/text_gray"
+            android:textColor="@color/theme_text_secondary"
             android:textSize="12sp" />
 
         <LinearLayout
@@ -57,10 +58,10 @@
                 android:layout_weight="1"
                 android:drawableStart="@drawable/ic_location"
                 android:drawablePadding="4dp"
-                android:drawableTint="@color/text_gray"
+                android:drawableTint="@color/theme_text_secondary"
                 android:gravity="center_vertical"
                 android:text="@string/post_item_location_hint"
-                android:textColor="@color/text_gray"
+                android:textColor="@color/theme_text_secondary"
                 android:textSize="12sp" />
 
             <ProgressBar

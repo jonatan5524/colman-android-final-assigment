@@ -16,3 +16,5 @@
 .cxx
 local.properties
 google-services.json
+serviceAccountKey.json
+scripts

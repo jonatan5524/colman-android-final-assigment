@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="8dp"
+    app:cardBackgroundColor="@color/theme_surface"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp">
 
@@ -45,7 +46,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Item Title"
-            android:textColor="@color/text_dark"
+            android:textColor="@color/theme_text_primary"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -67,7 +68,7 @@
                 android:layout_width="12dp"
                 android:layout_height="12dp"
                 android:src="@drawable/ic_location"
-                app:tint="@color/text_gray" />
+                app:tint="@color/theme_text_secondary" />
 
             <TextView
                 android:id="@+id/post_location"
@@ -75,8 +76,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:text="Location"
-                android:textColor="@color/text_gray"
+                android:textColor="@color/theme_text_secondary"
                 android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/city_loading_spinner"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="8dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
         </LinearLayout>
 
         <TextView
@@ -110,8 +120,20 @@
                 android:paddingHorizontal="12dp"
                 android:text="Mark as Given"
                 android:textAllCaps="false"
-                android:textColor="@color/text_dark"
+                android:textColor="@color/theme_text_primary"
                 android:textSize="12sp" />
+
+            <ImageButton
+                android:id="@+id/edit_post_button"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_input"
+                android:contentDescription="@string/cd_edit_post"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings"
+                app:tint="@color/theme_text_primary" />
 
             <ImageButton
                 android:id="@+id/delete_post_button"
@@ -119,6 +141,7 @@
                 android:layout_height="32dp"
                 android:layout_marginStart="12dp"
                 android:background="@drawable/bg_input"
+                android:contentDescription="@string/cd_delete_post"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_delete" />
