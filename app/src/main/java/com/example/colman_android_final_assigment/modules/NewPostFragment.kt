@@ -208,11 +208,17 @@ class NewPostFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: android.text.Editable?) {
-                if (s.isNullOrEmpty()) {
+                val text = s?.toString()?.trim().orEmpty()
+                if (text.isEmpty()) {
+                    // No city selected when the field is empty
                     selectedCityId = null
                     adapter.filter.filter(null) {
                         binding.cityAutocomplete.post { binding.cityAutocomplete.showDropDown() }
                     }
+                } else {
+                    // Try to resolve the city ID from the current text
+                    val matchedCity = cities.firstOrNull { it.second == text }
+                    selectedCityId = matchedCity?.first
                 }
             }
         })
