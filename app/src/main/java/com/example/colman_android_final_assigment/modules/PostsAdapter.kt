@@ -14,37 +14,34 @@ import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class PostsAdapter(
-    private val onPostClick: (Post) -> Unit = {}
+    private val onPostClick: (Post) -> Unit = {},
+    private val categoryNameById: Map<String, String> = emptyMap()
 ) : ListAdapter<Post, PostsAdapter.PostViewHolder>(PostDiffCallback()) {
 
     inner class PostViewHolder(private val binding: PostListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        private val viewHolderScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         private var cityJob: Job? = null
-        private var categoryJob: Job? = null
         private var boundPostId: String? = null
 
         fun bind(post: Post) {
             boundPostId = post.id
             binding.postTitle.text = post.title
-            
-            categoryJob?.cancel()
-            binding.postCategory.text = ""
-            categoryJob = CoroutineScope(Dispatchers.Main).launch {
-                val categoryName = AppLocalDb.getDatabase(binding.root.context).categoryDao().getCategoryNameById(post.categoryId) ?: post.categoryId
-                if (boundPostId == post.id) {
-                    binding.postCategory.text = categoryName
-                }
-            }
+
+            // Set category synchronously from the provided map to avoid per-row DB lookups.
+            val categoryName = categoryNameById[post.categoryId] ?: post.categoryId
+            binding.postCategory.text = categoryName
 
             cityJob?.cancel()
             binding.postLocation.text = ""
             binding.cityLoadingSpinner.visibility = View.VISIBLE
 
-            cityJob = CoroutineScope(Dispatchers.Main).launch {
+            cityJob = viewHolderScope.launch {
                 val cityName = CityApiService.getCityNameById(post.cityId)
                 if (boundPostId == post.id) {
                     binding.postLocation.text = cityName
@@ -64,6 +61,12 @@ class PostsAdapter(
 
             binding.root.setOnClickListener { onPostClick(post) }
         }
+
+        fun onRecycled() {
+            cityJob?.cancel()
+            binding.cityLoadingSpinner.visibility = View.GONE
+            boundPostId = null
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -75,6 +78,11 @@ class PostsAdapter(
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    override fun onViewRecycled(holder: PostViewHolder) {
+        super.onViewRecycled(holder)
+        holder.onRecycled()
     }
 
     private class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
