@@ -60,7 +60,6 @@ class MyPostsAdapter(
                     .error(R.drawable.ic_launcher_background)
                     .into(binding.postImage)
             } else {
-                // FIX: Explicitly clear the image to prevent bleed from recycled views
                 binding.postImage.setImageResource(R.drawable.bg_input)
             }
 
