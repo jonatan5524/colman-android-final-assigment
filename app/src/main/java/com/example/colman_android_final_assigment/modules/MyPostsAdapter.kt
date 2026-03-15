@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MyPostsAdapter(
     private val onToggleStatus: (Post) -> Unit,
@@ -32,7 +33,13 @@ class MyPostsAdapter(
         holder.bind(getItem(position))
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.clear()
+    }
+
     inner class ViewHolder(private val binding: MyPostListItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        private val uiScope = CoroutineScope(Dispatchers.Main)
         private var cityJob: Job? = null
         private var categoryJob: Job? = null
         private var boundPostId: String? = null
@@ -40,23 +47,31 @@ class MyPostsAdapter(
         fun bind(post: Post) {
             boundPostId = post.id
             binding.postTitle.text = post.title
-            
+
+            // Category loading logic
             categoryJob?.cancel()
             binding.postCategory.text = ""
-            categoryJob = CoroutineScope(Dispatchers.Main).launch {
-                val categoryName = AppLocalDb.getDatabase(binding.root.context).categoryDao().getCategoryNameById(post.categoryId) ?: post.categoryId
+            categoryJob = uiScope.launch {
+                val categoryName = withContext(Dispatchers.IO) {
+                    AppLocalDb.getDatabase(binding.root.context)
+                        .categoryDao()
+                        .getCategoryNameById(post.categoryId)
+                        ?: post.categoryId
+                }
                 if (boundPostId == post.id) {
                     binding.postCategory.text = categoryName
                 }
             }
-            
+
             // City loading logic
             cityJob?.cancel()
             binding.postLocation.text = ""
             binding.cityLoadingSpinner.visibility = View.VISIBLE
 
-            cityJob = CoroutineScope(Dispatchers.Main).launch {
-                val cityName = CityApiService.getCityNameById(post.cityId)
+            cityJob = uiScope.launch {
+                val cityName = withContext(Dispatchers.IO) {
+                    CityApiService.getCityNameById(post.cityId)
+                }
                 if (boundPostId == post.id) {
                     binding.postLocation.text = cityName
                     binding.cityLoadingSpinner.visibility = View.GONE
@@ -79,6 +94,14 @@ class MyPostsAdapter(
             binding.markAsGivenButton.setOnClickListener { onToggleStatus(post) }
             binding.deletePostButton.setOnClickListener { onDelete(post) }
             binding.editPostButton.setOnClickListener { onEdit(post) }
+        }
+
+        fun clear() {
+            boundPostId = null
+            cityJob?.cancel()
+            cityJob = null
+            categoryJob?.cancel()
+            categoryJob = null
         }
     }
 
