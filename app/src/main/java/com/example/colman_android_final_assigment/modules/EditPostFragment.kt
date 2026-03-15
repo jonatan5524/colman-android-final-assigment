@@ -154,11 +154,17 @@ class EditPostFragment : Fragment() {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
-                    if (s.isNullOrEmpty()) {
+                    val text = s?.toString().orEmpty()
+                    if (text.isEmpty()) {
+                        // No category text -> no selected category ID
                         selectedCategoryId = null
                         adapter.filter.filter(null) {
                             binding.editCategoryAutocomplete.post { binding.editCategoryAutocomplete.showDropDown() }
                         }
+                    } else {
+                        // Try to match current text to a known category; if none matches, clear the ID
+                        val matchedCategory = categories.firstOrNull { it.name == text }
+                        selectedCategoryId = matchedCategory?.id
                     }
                 }
             })
