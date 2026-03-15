@@ -129,8 +129,39 @@ class EditPostFragment : Fragment() {
                 selectedCategoryId = categories.firstOrNull { it.name == selectedName }?.id
             }
 
-            binding.editCategoryAutocomplete.setOnClickListener { binding.editCategoryAutocomplete.showDropDown() }
-            binding.editCategoryAutocomplete.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) binding.editCategoryAutocomplete.showDropDown() }
+            binding.editCategoryAutocomplete.setOnClickListener {
+                if (binding.editCategoryAutocomplete.text.isEmpty()) {
+                    adapter.filter.filter(null) {
+                        binding.editCategoryAutocomplete.post { binding.editCategoryAutocomplete.showDropDown() }
+                    }
+                } else {
+                    binding.editCategoryAutocomplete.showDropDown()
+                }
+            }
+            binding.editCategoryAutocomplete.setOnFocusChangeListener { _, hasFocus -> 
+                if (hasFocus) {
+                    if (binding.editCategoryAutocomplete.text.isEmpty()) {
+                        adapter.filter.filter(null) {
+                            binding.editCategoryAutocomplete.post { binding.editCategoryAutocomplete.showDropDown() }
+                        }
+                    } else {
+                        binding.editCategoryAutocomplete.showDropDown()
+                    }
+                }
+            }
+            
+            binding.editCategoryAutocomplete.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    if (s.isNullOrEmpty()) {
+                        selectedCategoryId = null
+                        adapter.filter.filter(null) {
+                            binding.editCategoryAutocomplete.post { binding.editCategoryAutocomplete.showDropDown() }
+                        }
+                    }
+                }
+            })
             
             // Re-apply selection if post was already loaded
             viewModel.post.value?.let { post ->
@@ -154,8 +185,39 @@ class EditPostFragment : Fragment() {
                     selectedCityId = cities.firstOrNull { it.second == selectedName }?.first
                 }
 
-                binding.editCityAutocomplete.setOnClickListener { binding.editCityAutocomplete.showDropDown() }
-                binding.editCityAutocomplete.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) binding.editCityAutocomplete.showDropDown() }
+                binding.editCityAutocomplete.setOnClickListener {
+                    if (binding.editCityAutocomplete.text.isEmpty()) {
+                        adapter.filter.filter(null) {
+                            binding.editCityAutocomplete.post { binding.editCityAutocomplete.showDropDown() }
+                        }
+                    } else {
+                        binding.editCityAutocomplete.showDropDown()
+                    }
+                }
+                binding.editCityAutocomplete.setOnFocusChangeListener { _, hasFocus -> 
+                    if (hasFocus) {
+                        if (binding.editCityAutocomplete.text.isEmpty()) {
+                            adapter.filter.filter(null) {
+                                binding.editCityAutocomplete.post { binding.editCityAutocomplete.showDropDown() }
+                            }
+                        } else {
+                            binding.editCityAutocomplete.showDropDown()
+                        }
+                    }
+                }
+                
+                binding.editCityAutocomplete.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                    override fun afterTextChanged(s: Editable?) {
+                        if (s.isNullOrEmpty()) {
+                            selectedCityId = null
+                            adapter.filter.filter(null) {
+                                binding.editCityAutocomplete.post { binding.editCityAutocomplete.showDropDown() }
+                            }
+                        }
+                    }
+                })
 
                 // Re-apply selection if post was already loaded
                 viewModel.post.value?.let { post ->

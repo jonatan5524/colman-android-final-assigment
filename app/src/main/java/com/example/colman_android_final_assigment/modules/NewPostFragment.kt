@@ -98,11 +98,38 @@ class NewPostFragment : Fragment() {
             }
 
             binding.categoryAutocomplete.setOnClickListener {
-                binding.categoryAutocomplete.showDropDown()
+                if (binding.categoryAutocomplete.text.isEmpty()) {
+                    adapter.filter.filter(null) {
+                        binding.categoryAutocomplete.post { binding.categoryAutocomplete.showDropDown() }
+                    }
+                } else {
+                    binding.categoryAutocomplete.showDropDown()
+                }
             }
             binding.categoryAutocomplete.setOnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) binding.categoryAutocomplete.showDropDown()
+                if (hasFocus) {
+                    if (binding.categoryAutocomplete.text.isEmpty()) {
+                        adapter.filter.filter(null) {
+                            binding.categoryAutocomplete.post { binding.categoryAutocomplete.showDropDown() }
+                        }
+                    } else {
+                        binding.categoryAutocomplete.showDropDown()
+                    }
+                }
             }
+            
+            binding.categoryAutocomplete.addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: android.text.Editable?) {
+                    if (s.isNullOrEmpty()) {
+                        selectedCategoryId = null
+                        adapter.filter.filter(null) {
+                            binding.categoryAutocomplete.post { binding.categoryAutocomplete.showDropDown() }
+                        }
+                    }
+                }
+            })
         }
 
         // Cities loading state
@@ -157,11 +184,38 @@ class NewPostFragment : Fragment() {
         }
 
         binding.cityAutocomplete.setOnClickListener {
-            binding.cityAutocomplete.showDropDown()
+            if (binding.cityAutocomplete.text.isEmpty()) {
+                adapter.filter.filter(null) {
+                    binding.cityAutocomplete.post { binding.cityAutocomplete.showDropDown() }
+                }
+            } else {
+                binding.cityAutocomplete.showDropDown()
+            }
         }
         binding.cityAutocomplete.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) binding.cityAutocomplete.showDropDown()
+            if (hasFocus) {
+                if (binding.cityAutocomplete.text.isEmpty()) {
+                    adapter.filter.filter(null) {
+                        binding.cityAutocomplete.post { binding.cityAutocomplete.showDropDown() }
+                    }
+                } else {
+                    binding.cityAutocomplete.showDropDown()
+                }
+            }
         }
+        
+        binding.cityAutocomplete.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s.isNullOrEmpty()) {
+                    selectedCityId = null
+                    adapter.filter.filter(null) {
+                        binding.cityAutocomplete.post { binding.cityAutocomplete.showDropDown() }
+                    }
+                }
+            }
+        })
     }
 
     /* ------------------------------------------------------------------ */
