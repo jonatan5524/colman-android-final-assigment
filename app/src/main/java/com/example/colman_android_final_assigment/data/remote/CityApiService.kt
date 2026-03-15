@@ -69,7 +69,7 @@ object CityApiService {
                 // Cache the result
                 cache[cityId] = cityName
                 cityName
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "City not found"
             }
         }
@@ -130,16 +130,10 @@ object CityApiService {
                 val sorted = cities.sortedBy { it.second }
                 allCitiesCache = sorted
                 sorted
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 emptyList()
             }
         }
-    }
-
-    /** Clear the in-memory cache (e.g. on logout). */
-    fun clearCache() {
-        cache.clear()
-        allCitiesCache = null
     }
 }
 

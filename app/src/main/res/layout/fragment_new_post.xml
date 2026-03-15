@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,6 +16,7 @@
             android:layout_height="200dp"
             android:background="@android:color/darker_gray"
             android:scaleType="centerCrop"
+            android:contentDescription="@string/content_desc_post_image"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
@@ -22,7 +24,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Upload Image"
+            android:text="@string/upload_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/post_image" />
@@ -32,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Title"
+            android:hint="@string/title"
             app:layout_constraintTop_toBottomOf="@id/upload_image_button">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -47,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Description"
+            android:hint="@string/description"
             app:layout_constraintTop_toBottomOf="@id/title_layout">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -65,7 +67,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Category"
+            android:text="@string/category"
+            android:labelFor="@+id/category_autocomplete"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/description_layout" />
 
@@ -85,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Type to search category..."
+            android:hint="@string/search_category_hint"
             app:layout_constraintTop_toBottomOf="@id/category_label">
 
             <AutoCompleteTextView
@@ -96,6 +99,7 @@
                 android:paddingVertical="16dp"
                 android:textSize="16sp"
                 android:inputType="text"
+                android:contentDescription="@string/category"
                 android:completionThreshold="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -105,7 +109,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="City"
+            android:text="@string/city"
+            android:labelFor="@+id/city_autocomplete"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/category_input_layout" />
 
@@ -125,7 +130,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Type to search city..."
+            android:hint="@string/search_city_hint"
             app:layout_constraintTop_toBottomOf="@id/city_label">
 
             <AutoCompleteTextView
@@ -136,6 +141,7 @@
                 android:paddingVertical="16dp"
                 android:textSize="16sp"
                 android:inputType="text"
+                android:contentDescription="@string/city"
                 android:completionThreshold="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -145,6 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:orientation="horizontal"
+            tools:ignore="ButtonStyle"
             app:layout_constraintTop_toBottomOf="@id/city_input_layout">
 
             <Button
@@ -154,7 +161,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="Cancel" />
+                android:text="@string/cancel" />
 
             <Button
                 android:id="@+id/save_post_button"
@@ -162,7 +169,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Post Item" />
+                android:text="@string/post_item" />
         </LinearLayout>
 
         <ProgressBar
