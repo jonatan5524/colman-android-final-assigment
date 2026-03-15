@@ -54,10 +54,6 @@ class FeedFragment : Fragment() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             viewModel.refreshPosts()
         }
-
-        binding.addPostFab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-        }
     }
 
     /* ------------------------------------------------------------------ */

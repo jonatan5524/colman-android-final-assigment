@@ -25,15 +25,23 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        val addPostFab = findViewById<View>(R.id.add_post_fab)
+
         bottomNav.setupWithNavController(navController)
+
+        addPostFab.setOnClickListener {
+            navController.navigate(R.id.newPostFragment)
+        }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.feedFragment, R.id.myPostsFragment, R.id.profileFragment -> {
                     bottomNav.visibility = View.VISIBLE
+                    addPostFab.visibility = View.VISIBLE
                 }
                 else -> {
                     bottomNav.visibility = View.GONE
+                    addPostFab.visibility = View.GONE
                 }
             }
         }
