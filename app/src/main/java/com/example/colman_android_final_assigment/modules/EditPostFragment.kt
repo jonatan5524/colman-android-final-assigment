@@ -106,7 +106,7 @@ class EditPostFragment : Fragment() {
 
         val cityId = selectedCityId
         if (cityId == null) {
-            binding.editCityLayout.error = "City cannot be empty"
+            binding.editCityLayout.error = getString(R.string.error_empty_city)
             isValid = false
         } else {
             binding.editCityLayout.error = null
