@@ -93,30 +93,39 @@
                 app:hintTextColor="@color/primary_teal"
                 app:boxStrokeColor="@color/primary_teal">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_category_edit_text"
+                <AutoCompleteTextView
+                    android:id="@+id/edit_category_autocomplete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="16dp"
+                    android:textSize="16sp"
                     android:textColor="@color/theme_text_primary"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:completionThreshold="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/edit_city_label"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_city_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="City"
-                android:textColor="@color/theme_text_primary"
-                android:textStyle="bold" />
+                android:hint="City"
+                app:hintTextColor="@color/primary_teal"
+                app:boxStrokeColor="@color/primary_teal">
 
-            <Spinner
-                android:id="@+id/edit_city_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_input"
-                android:paddingHorizontal="12dp" />
+                <AutoCompleteTextView
+                    android:id="@+id/edit_city_autocomplete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="16dp"
+                    android:textSize="16sp"
+                    android:textColor="@color/theme_text_primary"
+                    android:inputType="text"
+                    android:completionThreshold="1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/save_post_button"

@@ -17,6 +17,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.colman_android_final_assigment.R
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.databinding.FragmentEditPostBinding
+import com.example.colman_android_final_assigment.model.Category
 import com.example.colman_android_final_assigment.viewmodel.EditPostViewModel
 import com.squareup.picasso.Picasso
 
@@ -34,7 +35,10 @@ class EditPostFragment : Fragment() {
         }
     }
 
-    private val cities = arrayOf("Tel Aviv", "Haifa", "Jerusalem", "Beersheba", "Eilat")
+    private var cityList: List<Pair<Int, String>> = emptyList()
+    private var categoryList: List<Category> = emptyList()
+    private var selectedCategoryId: String? = null
+    private var selectedCityId: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,8 +50,6 @@ class EditPostFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setupCitySpinner()
         setupTextWatchers()
         viewModel.setPostId(args.postId)
         observeViewModel()
@@ -77,14 +79,12 @@ class EditPostFragment : Fragment() {
         }
         binding.editTitleEditText.addTextChangedListener(watcher)
         binding.editDescriptionEditText.addTextChangedListener(watcher)
-        binding.editCategoryEditText.addTextChangedListener(watcher)
+        binding.editCategoryAutocomplete.addTextChangedListener(watcher)
     }
 
     private fun validateAndSave() {
         val title = binding.editTitleEditText.text.toString().trim()
         val description = binding.editDescriptionEditText.text.toString().trim()
-        val category = binding.editCategoryEditText.text.toString().trim()
-        val cityId = binding.editCitySpinner.selectedItemPosition
 
         var isValid = true
 
@@ -96,33 +96,93 @@ class EditPostFragment : Fragment() {
             binding.editDescriptionLayout.error = getString(R.string.error_empty_description)
             isValid = false
         }
-        if (category.isEmpty()) {
+        val categoryId = selectedCategoryId
+        if (categoryId == null) {
             binding.editCategoryLayout.error = getString(R.string.error_empty_category)
             isValid = false
+        } else {
+            binding.editCategoryLayout.error = null
+        }
+
+        val cityId = selectedCityId
+        if (cityId == null) {
+            binding.editCityLayout.error = "City cannot be empty"
+            isValid = false
+        } else {
+            binding.editCityLayout.error = null
         }
 
         if (isValid) {
-            viewModel.savePost(title, description, category, cityId, imageUri)
+            viewModel.savePost(title, description, categoryId!!, cityId!!, imageUri)
         }
     }
 
-    private fun setupCitySpinner() {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cities)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.editCitySpinner.adapter = adapter
-    }
-
     private fun observeViewModel() {
+        viewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryList = categories
+            val names = categories.map { it.name }
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+            binding.editCategoryAutocomplete.setAdapter(adapter)
+
+            binding.editCategoryAutocomplete.setOnItemClickListener { _, _, position, _ ->
+                val selectedName = binding.editCategoryAutocomplete.adapter.getItem(position) as String
+                selectedCategoryId = categories.firstOrNull { it.name == selectedName }?.id
+            }
+
+            binding.editCategoryAutocomplete.setOnClickListener { binding.editCategoryAutocomplete.showDropDown() }
+            binding.editCategoryAutocomplete.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) binding.editCategoryAutocomplete.showDropDown() }
+            
+            // Re-apply selection if post was already loaded
+            viewModel.post.value?.let { post ->
+                val cat = categories.firstOrNull { it.id == post.categoryId }
+                if (cat != null) {
+                    binding.editCategoryAutocomplete.setText(cat.name, false)
+                    selectedCategoryId = cat.id
+                }
+            }
+        }
+
+        viewModel.allCities.observe(viewLifecycleOwner) { cities ->
+            cityList = cities
+            if (cities.isNotEmpty()) {
+                val cityNames = cities.map { it.second }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, cityNames)
+                binding.editCityAutocomplete.setAdapter(adapter)
+
+                binding.editCityAutocomplete.setOnItemClickListener { _, _, position, _ ->
+                    val selectedName = binding.editCityAutocomplete.adapter.getItem(position) as String
+                    selectedCityId = cities.firstOrNull { it.second == selectedName }?.first
+                }
+
+                binding.editCityAutocomplete.setOnClickListener { binding.editCityAutocomplete.showDropDown() }
+                binding.editCityAutocomplete.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) binding.editCityAutocomplete.showDropDown() }
+
+                // Re-apply selection if post was already loaded
+                viewModel.post.value?.let { post ->
+                    val city = cities.firstOrNull { it.first == post.cityId }
+                    if (city != null) {
+                        binding.editCityAutocomplete.setText(city.second, false)
+                        selectedCityId = city.first
+                    }
+                }
+            }
+        }
+
         viewModel.post.observe(viewLifecycleOwner) { post ->
             post?.let {
                 binding.editTitleEditText.setText(it.title)
                 binding.editDescriptionEditText.setText(it.description)
-                binding.editCategoryEditText.setText(it.categoryId)
                 
-                if (it.cityId in cities.indices) {
-                    binding.editCitySpinner.setSelection(it.cityId)
-                } else {
-                    binding.editCitySpinner.setSelection(0)
+                val cat = categoryList.firstOrNull { c -> c.id == it.categoryId }
+                if (cat != null) {
+                    binding.editCategoryAutocomplete.setText(cat.name, false)
+                    selectedCategoryId = cat.id
+                }
+
+                val city = cityList.firstOrNull { c -> c.first == it.cityId }
+                if (city != null) {
+                    binding.editCityAutocomplete.setText(city.second, false)
+                    selectedCityId = city.first
                 }
 
                 if (it.imageUrl.isNotEmpty() && imageUri == null) {

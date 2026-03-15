@@ -30,6 +30,9 @@ class NewPostFragment : Fragment() {
     /** Currently loaded category list. */
     private var categoryList: List<Category> = emptyList()
 
+    /** The category ID selected by the user via autocomplete. */
+    private var selectedCategoryId: String? = null
+
     /** The city ID selected by the user via autocomplete. */
     private var selectedCityId: Int? = null
 
@@ -82,9 +85,24 @@ class NewPostFragment : Fragment() {
         viewModel.categories.observe(viewLifecycleOwner) { categories ->
             categoryList = categories
             val names = categories.map { it.name }
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.categorySpinner.adapter = adapter
+            val adapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                names
+            )
+            binding.categoryAutocomplete.setAdapter(adapter)
+
+            binding.categoryAutocomplete.setOnItemClickListener { _, _, position, _ ->
+                val selectedName = binding.categoryAutocomplete.adapter.getItem(position) as String
+                selectedCategoryId = categories.firstOrNull { it.name == selectedName }?.id
+            }
+
+            binding.categoryAutocomplete.setOnClickListener {
+                binding.categoryAutocomplete.showDropDown()
+            }
+            binding.categoryAutocomplete.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) binding.categoryAutocomplete.showDropDown()
+            }
         }
 
         // Cities loading state
@@ -137,6 +155,13 @@ class NewPostFragment : Fragment() {
             val selectedName = binding.cityAutocomplete.adapter.getItem(position) as String
             selectedCityId = cities.firstOrNull { it.second == selectedName }?.first
         }
+
+        binding.cityAutocomplete.setOnClickListener {
+            binding.cityAutocomplete.showDropDown()
+        }
+        binding.cityAutocomplete.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) binding.cityAutocomplete.showDropDown()
+        }
     }
 
     /* ------------------------------------------------------------------ */
@@ -164,9 +189,12 @@ class NewPostFragment : Fragment() {
         }
 
         // Category validation
-        if (categoryList.isEmpty()) {
-            Toast.makeText(context, "No categories available", Toast.LENGTH_SHORT).show()
+        val categoryId = selectedCategoryId
+        if (categoryId == null) {
+            binding.categoryInputLayout.error = getString(R.string.error_empty_category)
             isValid = false
+        } else {
+            binding.categoryInputLayout.error = null
         }
 
         // City validation
@@ -179,11 +207,10 @@ class NewPostFragment : Fragment() {
         }
 
         if (isValid) {
-            val selectedCategory = categoryList[binding.categorySpinner.selectedItemPosition]
             viewModel.createPost(
                 title = title,
                 description = description,
-                categoryId = selectedCategory.id,
+                categoryId = categoryId!!,
                 cityId = cityId!!,
                 imageUri = imageUri
             )
