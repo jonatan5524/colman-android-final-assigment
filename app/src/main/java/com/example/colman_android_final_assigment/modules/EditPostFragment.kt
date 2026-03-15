@@ -217,10 +217,16 @@ class EditPostFragment : Fragment() {
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                     override fun afterTextChanged(s: Editable?) {
                         if (s.isNullOrEmpty()) {
+                            // When text is cleared, also clear the selected city id and reset the dropdown
                             selectedCityId = null
                             adapter.filter.filter(null) {
                                 binding.editCityAutocomplete.post { binding.editCityAutocomplete.showDropDown() }
                             }
+                        } else {
+                            // When text is non-empty, ensure selectedCityId matches the current text (or clear it)
+                            val currentText = s.toString()
+                            val matchedCity = cities.firstOrNull { it.second == currentText }
+                            selectedCityId = matchedCity?.first
                         }
                     }
                 })
