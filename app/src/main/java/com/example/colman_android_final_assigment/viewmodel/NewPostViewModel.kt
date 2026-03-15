@@ -55,7 +55,6 @@ class NewPostViewModel(application: Application) : AndroidViewModel(application)
         description: String,
         categoryId: String,
         cityId: Int,
-        whatsappNumber: String,
         imageUri: Uri?
     ) {
         _createState.value = Resource.Loading
@@ -65,7 +64,6 @@ class NewPostViewModel(application: Application) : AndroidViewModel(application)
                 description = description,
                 categoryId = categoryId,
                 cityId = cityId,
-                whatsappNumber = whatsappNumber,
                 imageUri = imageUri
             )
         }

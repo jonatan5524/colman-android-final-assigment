@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.colman_android_final_assigment.data.remote.CityApiService
+import com.example.colman_android_final_assigment.database.AppLocalDb
 import com.example.colman_android_final_assigment.databinding.PostListItemBinding
 import com.example.colman_android_final_assigment.model.Post
 import com.squareup.picasso.Picasso
@@ -23,12 +24,21 @@ class PostsAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         private var cityJob: Job? = null
+        private var categoryJob: Job? = null
         private var boundPostId: String? = null
 
         fun bind(post: Post) {
             boundPostId = post.id
             binding.postTitle.text = post.title
-            binding.postCategory.text = post.categoryId
+            
+            categoryJob?.cancel()
+            binding.postCategory.text = ""
+            categoryJob = CoroutineScope(Dispatchers.Main).launch {
+                val categoryName = AppLocalDb.getDatabase(binding.root.context).categoryDao().getCategoryNameById(post.categoryId) ?: post.categoryId
+                if (boundPostId == post.id) {
+                    binding.postCategory.text = categoryName
+                }
+            }
 
             cityJob?.cancel()
             binding.postLocation.text = ""

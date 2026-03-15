@@ -119,42 +119,47 @@
                 android:id="@+id/city_autocomplete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingVertical="16dp"
+                android:textSize="16sp"
                 android:inputType="text"
                 android:completionThreshold="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/whatsapp_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="WhatsApp Number"
-            app:layout_constraintTop_toBottomOf="@id/city_input_layout">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/whatsapp_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/save_post_button"
+        <LinearLayout
+            android:id="@+id/buttons_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Post Item"
-            app:layout_constraintTop_toBottomOf="@id/whatsapp_layout" />
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/city_input_layout">
+
+            <Button
+                android:id="@+id/cancel_post_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/save_post_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="Post Item" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/save_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/save_post_button"
-            app:layout_constraintEnd_toEndOf="@id/save_post_button"
-            app:layout_constraintStart_toStartOf="@id/save_post_button"
-            app:layout_constraintTop_toTopOf="@id/save_post_button" />
+            app:layout_constraintBottom_toBottomOf="@id/buttons_layout"
+            app:layout_constraintEnd_toEndOf="@id/buttons_layout"
+            app:layout_constraintStart_toStartOf="@id/buttons_layout"
+            app:layout_constraintTop_toTopOf="@id/buttons_layout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

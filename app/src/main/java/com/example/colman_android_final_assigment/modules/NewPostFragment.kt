@@ -54,6 +54,10 @@ class NewPostFragment : Fragment() {
         setupImagePicker()
         observeViewModel()
 
+        binding.cancelPostButton.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         binding.savePostButton.setOnClickListener {
             validateAndSave()
         }
@@ -142,7 +146,6 @@ class NewPostFragment : Fragment() {
     private fun validateAndSave() {
         val title = binding.titleEditText.text.toString().trim()
         val description = binding.descriptionEditText.text.toString().trim()
-        val whatsappNumber = binding.whatsappEditText.text.toString().trim()
 
         var isValid = true
 
@@ -182,7 +185,6 @@ class NewPostFragment : Fragment() {
                 description = description,
                 categoryId = selectedCategory.id,
                 cityId = cityId!!,
-                whatsappNumber = whatsappNumber,
                 imageUri = imageUri
             )
         }

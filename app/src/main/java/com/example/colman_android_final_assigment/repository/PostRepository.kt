@@ -128,7 +128,6 @@ class PostRepository(context: Context) {
         description: String,
         categoryId: String,
         cityId: Int,
-        whatsappNumber: String,
         imageUri: Uri?
     ): Resource<Unit> {
         return try {
@@ -154,7 +153,6 @@ class PostRepository(context: Context) {
                 "description" to description,
                 "categoryId" to categoryId,
                 "cityId" to cityId,
-                "whatsappNumber" to whatsappNumber,
                 "imageUrl" to imageUrl,
                 "isTaken" to false,
                 "userId" to userId
