@@ -1,17 +1,195 @@
 package com.example.colman_android_final_assigment.modules
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.colman_android_final_assigment.R
+import com.example.colman_android_final_assigment.base.Resource
+import com.example.colman_android_final_assigment.databinding.FragmentNewPostBinding
+import com.example.colman_android_final_assigment.model.Category
+import com.example.colman_android_final_assigment.viewmodel.NewPostViewModel
 
 class NewPostFragment : Fragment() {
+
+    private var _binding: FragmentNewPostBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel: NewPostViewModel by viewModels()
+    private var imageUri: Uri? = null
+
+    /** Currently loaded city list. Each entry is (cityId, cityName). */
+    private var cityList: List<Pair<Int, String>> = emptyList()
+
+    /** Currently loaded category list. */
+    private var categoryList: List<Category> = emptyList()
+
+    /** The city ID selected by the user via autocomplete. */
+    private var selectedCityId: Int? = null
+
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            imageUri = it
+            binding.postImage.setImageURI(it)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_new_post, container, false)
+    ): View {
+        _binding = FragmentNewPostBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupImagePicker()
+        observeViewModel()
+
+        binding.savePostButton.setOnClickListener {
+            validateAndSave()
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Image picker                                                       */
+    /* ------------------------------------------------------------------ */
+
+    private fun setupImagePicker() {
+        binding.uploadImageButton.setOnClickListener {
+            pickImage.launch("image/*")
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Observers                                                          */
+    /* ------------------------------------------------------------------ */
+
+    private fun observeViewModel() {
+        // Categories
+        viewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryList = categories
+            val names = categories.map { it.name }
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.categorySpinner.adapter = adapter
+        }
+
+        // Cities loading state
+        viewModel.citiesLoading.observe(viewLifecycleOwner) { loading ->
+            binding.cityLoadingSpinner.visibility = if (loading) View.VISIBLE else View.GONE
+            binding.cityAutocomplete.isEnabled = !loading
+        }
+
+        // Cities list
+        viewModel.allCities.observe(viewLifecycleOwner) { cities ->
+            cityList = cities
+            if (cities.isNotEmpty()) {
+                setupCityAutocomplete(cities)
+            }
+        }
+
+        // Create result
+        viewModel.createState.observe(viewLifecycleOwner) { resource ->
+            binding.saveProgressBar.visibility = if (resource is Resource.Loading) View.VISIBLE else View.GONE
+            binding.savePostButton.isEnabled = resource !is Resource.Loading
+
+            when (resource) {
+                is Resource.Success -> {
+                    Toast.makeText(context, "Post created successfully!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_newPostFragment_to_feedFragment)
+                }
+                is Resource.Error -> {
+                    Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  City autocomplete                                                  */
+    /* ------------------------------------------------------------------ */
+
+    private fun setupCityAutocomplete(cities: List<Pair<Int, String>>) {
+        val cityNames = cities.map { it.second }
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            cityNames
+        )
+        binding.cityAutocomplete.setAdapter(adapter)
+
+        binding.cityAutocomplete.setOnItemClickListener { _, _, position, _ ->
+            // The position corresponds to the filtered adapter, so look up by name
+            val selectedName = binding.cityAutocomplete.adapter.getItem(position) as String
+            selectedCityId = cities.firstOrNull { it.second == selectedName }?.first
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Validation & Save                                                  */
+    /* ------------------------------------------------------------------ */
+
+    private fun validateAndSave() {
+        val title = binding.titleEditText.text.toString().trim()
+        val description = binding.descriptionEditText.text.toString().trim()
+        val whatsappNumber = binding.whatsappEditText.text.toString().trim()
+
+        var isValid = true
+
+        if (title.isEmpty()) {
+            binding.titleLayout.error = getString(R.string.error_empty_title)
+            isValid = false
+        } else {
+            binding.titleLayout.error = null
+        }
+
+        if (description.isEmpty()) {
+            binding.descriptionLayout.error = getString(R.string.error_empty_description)
+            isValid = false
+        } else {
+            binding.descriptionLayout.error = null
+        }
+
+        // Category validation
+        if (categoryList.isEmpty()) {
+            Toast.makeText(context, "No categories available", Toast.LENGTH_SHORT).show()
+            isValid = false
+        }
+
+        // City validation
+        val cityId = selectedCityId
+        if (cityId == null) {
+            binding.cityInputLayout.error = getString(R.string.error_empty_city)
+            isValid = false
+        } else {
+            binding.cityInputLayout.error = null
+        }
+
+        if (isValid) {
+            val selectedCategory = categoryList[binding.categorySpinner.selectedItemPosition]
+            viewModel.createPost(
+                title = title,
+                description = description,
+                categoryId = selectedCategory.id,
+                cityId = cityId!!,
+                whatsappNumber = whatsappNumber,
+                imageUri = imageUri
+            )
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.colman_android_final_assigment.R
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.data.remote.CityApiService
@@ -52,6 +53,10 @@ class FeedFragment : Fragment() {
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             viewModel.refreshPosts()
+        }
+
+        binding.addPostFab.setOnClickListener {
+            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
     }
 

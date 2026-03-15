@@ -117,7 +117,7 @@ class EditPostFragment : Fragment() {
             post?.let {
                 binding.editTitleEditText.setText(it.title)
                 binding.editDescriptionEditText.setText(it.description)
-                binding.editCategoryEditText.setText(it.category)
+                binding.editCategoryEditText.setText(it.categoryId)
                 
                 if (it.cityId in cities.indices) {
                     binding.editCitySpinner.setSelection(it.cityId)

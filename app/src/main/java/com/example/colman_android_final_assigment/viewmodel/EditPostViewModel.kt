@@ -30,7 +30,7 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
     fun savePost(
         title: String,
         description: String,
-        category: String,
+        categoryId: String,
         cityId: Int,
         imageUri: Uri?
     ) {
@@ -41,7 +41,7 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
                 postId = id,
                 title = title,
                 description = description,
-                category = category,
+                categoryId = categoryId,
                 cityId = cityId,
                 imageUri = imageUri
             )

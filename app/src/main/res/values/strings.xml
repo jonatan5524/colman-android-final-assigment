@@ -21,4 +21,5 @@
     <string name="error_empty_title">Title cannot be empty</string>
     <string name="error_empty_description">Description cannot be empty</string>
     <string name="error_empty_category">Category cannot be empty</string>
+    <string name="error_empty_city">Please select a city</string>
 </resources>

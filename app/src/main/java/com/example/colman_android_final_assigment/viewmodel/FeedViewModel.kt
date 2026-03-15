@@ -45,7 +45,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /** Dynamic list of categories currently in cache */
-    val availableCategories: LiveData<List<String>> = repository.getAllCategoriesLiveData()
+    val availableCategories: LiveData<List<String>> = repository.getAllCategoryIdsLiveData()
 
     /** Dynamic list of city IDs currently in cache */
     val availableCityIds: LiveData<List<Int>> = repository.getAllCityIdsLiveData()

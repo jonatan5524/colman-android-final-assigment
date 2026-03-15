@@ -38,7 +38,7 @@ class MyPostsAdapter(
         fun bind(post: Post) {
             boundPostId = post.id
             binding.postTitle.text = post.title
-            binding.postCategory.text = post.category
+            binding.postCategory.text = post.categoryId
             
             // City loading logic
             cityJob?.cancel()
