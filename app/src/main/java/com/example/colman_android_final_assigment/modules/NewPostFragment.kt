@@ -36,6 +36,9 @@ class NewPostFragment : Fragment() {
     /** The city ID selected by the user via autocomplete. */
     private var selectedCityId: Int? = null
 
+    /** Keeps a single category watcher instance to avoid duplicate listeners. */
+    private var categoryTextWatcher: android.text.TextWatcher? = null
+
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             imageUri = it
@@ -118,9 +121,8 @@ class NewPostFragment : Fragment() {
                 }
             }
             
-            val watcherTagKey = R.id.categoryAutocomplete
-            if (binding.categoryAutocomplete.getTag(watcherTagKey) == null) {
-                val textWatcher = object : android.text.TextWatcher {
+            if (categoryTextWatcher == null) {
+                categoryTextWatcher = object : android.text.TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                     override fun afterTextChanged(s: android.text.Editable?) {
@@ -132,8 +134,7 @@ class NewPostFragment : Fragment() {
                         }
                     }
                 }
-                binding.categoryAutocomplete.addTextChangedListener(textWatcher)
-                binding.categoryAutocomplete.setTag(watcherTagKey, textWatcher)
+                binding.categoryAutocomplete.addTextChangedListener(categoryTextWatcher)
             }
         }
 
