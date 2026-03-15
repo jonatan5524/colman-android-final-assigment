@@ -89,15 +89,15 @@ class EditPostFragment : Fragment() {
         var isValid = true
 
         if (title.isEmpty()) {
-            binding.editTitleLayout.error = "Title is required"
+            binding.editTitleLayout.error = getString(R.string.error_empty_title)
             isValid = false
         }
         if (description.isEmpty()) {
-            binding.editDescriptionLayout.error = "Description is required"
+            binding.editDescriptionLayout.error = getString(R.string.error_empty_description)
             isValid = false
         }
         if (category.isEmpty()) {
-            binding.editCategoryLayout.error = "Category is required"
+            binding.editCategoryLayout.error = getString(R.string.error_empty_category)
             isValid = false
         }
 
