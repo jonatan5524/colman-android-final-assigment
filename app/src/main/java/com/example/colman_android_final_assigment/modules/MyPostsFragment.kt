@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -57,7 +57,7 @@ class MyPostsFragment : Fragment() {
     }
 
     private fun showDeleteConfirmation(post: Post) {
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.delete_dialog_title))
             .setMessage(getString(R.string.delete_dialog_message))
             .setPositiveButton(getString(R.string.delete_confirm)) { _, _ ->
