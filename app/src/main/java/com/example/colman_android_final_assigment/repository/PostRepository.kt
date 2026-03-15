@@ -95,6 +95,9 @@ class PostRepository(context: Context) {
             val currentPostIds = posts.map { it.id }
             if (currentPostIds.isNotEmpty()) {
                 postDao.deleteUserPostsNotInList(userId, currentPostIds)
+            } else {
+                // Firestore returned no posts for this user; remove any stale local posts
+                postDao.deletePostsByUserId(userId)
             }
 
             Resource.Success(Unit)
