@@ -8,7 +8,7 @@ data class Post(
     @PrimaryKey val id: String = "",
     val title: String = "",
     val description: String = "",
-    val category: String = "",
+    val categoryId: String = "",
     val cityId: Int = 0,
     val imageUrl: String = "",
     val isTaken: Boolean = false,

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,6 +16,7 @@
             android:layout_height="200dp"
             android:background="@android:color/darker_gray"
             android:scaleType="centerCrop"
+            android:contentDescription="@string/content_desc_post_image"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
@@ -22,7 +24,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Upload Image"
+            android:text="@string/upload_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/post_image" />
@@ -32,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Title"
+            android:hint="@string/title"
             app:layout_constraintTop_toBottomOf="@id/upload_image_button">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -47,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Description"
+            android:hint="@string/description"
             app:layout_constraintTop_toBottomOf="@id/title_layout">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -59,54 +61,126 @@
                 android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Category Spinner -->
+        <TextView
+            android:id="@+id/category_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/category"
+            android:labelFor="@+id/category_autocomplete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/description_layout" />
+
+        <ProgressBar
+            android:id="@+id/category_loading_spinner"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/category_label"
+            app:layout_constraintStart_toEndOf="@id/category_label"
+            app:layout_constraintTop_toTopOf="@id/category_label" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/category_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/search_category_hint"
+            app:layout_constraintTop_toBottomOf="@id/category_label">
+
+            <AutoCompleteTextView
+                android:id="@+id/category_autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:contentDescription="@string/category"
+                android:completionThreshold="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- City AutoCompleteTextView -->
         <TextView
             android:id="@+id/city_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="City"
+            android:text="@string/city"
+            android:labelFor="@+id/city_autocomplete"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/description_layout" />
+            app:layout_constraintTop_toBottomOf="@id/category_input_layout" />
 
-        <Spinner
-            android:id="@+id/city_spinner"
+        <ProgressBar
+            android:id="@+id/city_loading_spinner"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/city_label"
+            app:layout_constraintStart_toEndOf="@id/city_label"
+            app:layout_constraintTop_toTopOf="@id/city_label" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/city_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/city_label" />
+            android:hint="@string/search_city_hint"
+            app:layout_constraintTop_toBottomOf="@id/city_label">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/whatsapp_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="WhatsApp Number"
-            app:layout_constraintTop_toBottomOf="@id/city_spinner">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/whatsapp_edit_text"
+            <AutoCompleteTextView
+                android:id="@+id/city_autocomplete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="phone" />
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:contentDescription="@string/city"
+                android:completionThreshold="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/save_post_button"
+        <LinearLayout
+            android:id="@+id/buttons_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Post Item"
-            app:layout_constraintTop_toBottomOf="@id/whatsapp_layout" />
+            android:orientation="horizontal"
+            tools:ignore="ButtonStyle"
+            app:layout_constraintTop_toBottomOf="@id/city_input_layout">
+
+            <Button
+                android:id="@+id/cancel_post_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/cancel" />
+
+            <Button
+                android:id="@+id/save_post_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/post_item" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/save_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/save_post_button"
-            app:layout_constraintEnd_toEndOf="@id/save_post_button"
-            app:layout_constraintStart_toStartOf="@id/save_post_button"
-            app:layout_constraintTop_toTopOf="@id/save_post_button" />
+            app:layout_constraintBottom_toBottomOf="@id/buttons_layout"
+            app:layout_constraintEnd_toEndOf="@id/buttons_layout"
+            app:layout_constraintStart_toStartOf="@id/buttons_layout"
+            app:layout_constraintTop_toTopOf="@id/buttons_layout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.database.AppLocalDb
 import com.example.colman_android_final_assigment.model.Post
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -18,24 +19,24 @@ class PostRepository(context: Context) {
     /** Filtered posts: free-text search + multi-select category/city filter */
     fun getFilteredPostsMultiLiveData(
         query: String,
-        categories: List<String>,
+        categoryIds: List<String>,
         cityIds: List<Int>
     ): LiveData<List<Post>> {
-        return if (query.isBlank() && categories.isEmpty() && cityIds.isEmpty()) {
+        return if (query.isBlank() && categoryIds.isEmpty() && cityIds.isEmpty()) {
             postDao.getAllPosts()
         } else {
             postDao.searchAndFilterMulti(
                 query = query,
-                categories = categories.ifEmpty { listOf("") },
-                noCategories = if (categories.isEmpty()) 1 else 0,
+                categoryIds = categoryIds.ifEmpty { listOf("") },
+                noCategories = if (categoryIds.isEmpty()) 1 else 0,
                 cityIds = cityIds.ifEmpty { listOf(-1) },
                 noCities = if (cityIds.isEmpty()) 1 else 0
             )
         }
     }
 
-    /** All unique categories from the local cache */
-    fun getAllCategoriesLiveData(): LiveData<List<String>> = postDao.getAllCategories()
+    /** All unique category IDs from the local cache */
+    fun getAllCategoryIdsLiveData(): LiveData<List<String>> = postDao.getAllCategoryIds()
 
     /** All unique city IDs from the local cache */
     fun getAllCityIdsLiveData(): LiveData<List<Int>> = postDao.getAllCityIds()
@@ -120,6 +121,66 @@ class PostRepository(context: Context) {
     }
 
     /**
+     * Create a new post: upload image → save to Firestore → cache in Room.
+     */
+    suspend fun createPost(
+        title: String,
+        description: String,
+        categoryId: String,
+        cityId: Int,
+        imageUri: Uri?
+    ): Resource<Unit> {
+        return try {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+                ?: throw Exception("Not logged in")
+            val storage = FirebaseStorage.getInstance()
+
+            // Generate a new document ID
+            val docRef = firestore.collection("posts").document()
+            val postId = docRef.id
+
+            // Upload image if provided
+            var imageUrl = ""
+            if (imageUri != null) {
+                val ref = storage.reference.child("posts/$postId.jpg")
+                ref.putFile(imageUri).await()
+                imageUrl = ref.downloadUrl.await().toString()
+            }
+
+            // Build the post data
+            val postData = hashMapOf(
+                "title" to title,
+                "description" to description,
+                "categoryId" to categoryId,
+                "cityId" to cityId,
+                "imageUrl" to imageUrl,
+                "isTaken" to false,
+                "userId" to userId
+            )
+
+            // Save to Firestore
+            docRef.set(postData).await()
+
+            // Cache locally in Room
+            val post = Post(
+                id = postId,
+                title = title,
+                description = description,
+                categoryId = categoryId,
+                cityId = cityId,
+                imageUrl = imageUrl,
+                isTaken = false,
+                userId = userId
+            )
+            postDao.insertPost(post)
+
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to create post")
+        }
+    }
+
+    /**
      * Delete a post from Firestore and the local Room cache.
      */
     suspend fun deletePost(post: Post): Resource<Unit> {
@@ -149,7 +210,7 @@ class PostRepository(context: Context) {
         postId: String,
         title: String,
         description: String,
-        category: String,
+        categoryId: String,
         cityId: Int,
         imageUri: Uri?
     ): Resource<Unit> {
@@ -158,7 +219,7 @@ class PostRepository(context: Context) {
             val updates = mutableMapOf<String, Any>(
                 "title" to title,
                 "description" to description,
-                "category" to category,
+                "categoryId" to categoryId,
                 "cityId" to cityId
             )
 
@@ -197,7 +258,7 @@ class PostRepository(context: Context) {
             id = doc.id,
             title = doc.getString("title") ?: "",
             description = doc.getString("description") ?: "",
-            category = doc.getString("category") ?: "",
+            categoryId = doc.getString("categoryId") ?: "",
             cityId = (doc.getLong("cityId") ?: 0L).toInt(),
             imageUrl = doc.getString("imageUrl") ?: "",
             isTaken = doc.getBoolean("isTaken") ?: false,

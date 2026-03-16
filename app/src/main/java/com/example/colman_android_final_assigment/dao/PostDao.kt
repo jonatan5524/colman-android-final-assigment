@@ -36,29 +36,31 @@ interface PostDao {
     @Query("DELETE FROM posts WHERE userId = :userId AND id NOT IN (:postIds)")
     suspend fun deleteUserPostsNotInList(userId: String, postIds: List<String>)
 
-    /** Combined search + multi-select category AND city filter */
+    @Query("DELETE FROM posts WHERE userId = :userId")
+    suspend fun deletePostsByUserId(userId: String)
+
+    /** Combined search + multi-select categoryId AND city filter */
     @Query("""
         SELECT * FROM posts 
         WHERE (LOWER(title) LIKE '%' || LOWER(:query) || '%' 
             OR LOWER(description) LIKE '%' || LOWER(:query) || '%')
-        AND (:noCategories = 1 OR category IN (:categories))
+        AND (:noCategories = 1 OR categoryId IN (:categoryIds))
         AND (:noCities = 1 OR cityId IN (:cityIds))
         ORDER BY title ASC
     """)
     fun searchAndFilterMulti(
         query: String,
-        categories: List<String>,
+        categoryIds: List<String>,
         noCategories: Int,
         cityIds: List<Int>,
         noCities: Int
     ): LiveData<List<Post>>
 
-    /** All unique categories currently in the cache */
-    @Query("SELECT DISTINCT category FROM posts WHERE category != '' ORDER BY category ASC")
-    fun getAllCategories(): LiveData<List<String>>
+    /** All unique category IDs currently in the cache */
+    @Query("SELECT DISTINCT categoryId FROM posts WHERE categoryId != '' ORDER BY categoryId ASC")
+    fun getAllCategoryIds(): LiveData<List<String>>
 
     /** All unique city IDs currently in the cache */
     @Query("SELECT DISTINCT cityId FROM posts ORDER BY cityId ASC")
     fun getAllCityIds(): LiveData<List<Int>>
 }
-

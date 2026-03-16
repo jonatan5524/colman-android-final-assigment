@@ -69,7 +69,7 @@ object CityApiService {
                 // Cache the result
                 cache[cityId] = cityName
                 cityName
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "City not found"
             }
         }
@@ -82,9 +82,58 @@ object CityApiService {
         uncached.forEach { getCityNameById(it) }
     }
 
-    /** Clear the in-memory cache (e.g. on logout). */
-    fun clearCache() {
-        cache.clear()
+    /** In-memory cache for full city list: (cityId, cityName) */
+    private var allCitiesCache: List<Pair<Int, String>>? = null
+
+    /**
+     * Fetch ALL cities in a single API call (limit=1500).
+     * Results are cached in-memory so subsequent calls return instantly.
+     */
+    suspend fun getAllCities(): List<Pair<Int, String>> {
+        allCitiesCache?.let { return it }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                val urlString = "$BASE_URL?resource_id=$RESOURCE_ID&limit=1500"
+                val url = URL(urlString)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 15_000
+                connection.readTimeout = 15_000
+
+                val responseCode = connection.responseCode
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    return@withContext emptyList()
+                }
+
+                val responseBody = connection.inputStream.bufferedReader().use { it.readText() }
+                connection.disconnect()
+
+                val json = JSONObject(responseBody)
+                if (!json.optBoolean("success", false)) {
+                    return@withContext emptyList()
+                }
+
+                val records = json.getJSONObject("result").getJSONArray("records")
+                val cities = mutableListOf<Pair<Int, String>>()
+                for (i in 0 until records.length()) {
+                    val record = records.getJSONObject(i)
+                    val cityId = record.optInt("סמל_ישוב", -1)
+                    val englishName = record.optString("שם_ישוב_לועזי", "").trim()
+                    if (cityId > 0 && englishName.isNotEmpty()) {
+                        cities.add(cityId to englishName)
+                        // Also populate the single-lookup cache
+                        cache[cityId] = englishName
+                    }
+                }
+
+                val sorted = cities.sortedBy { it.second }
+                allCitiesCache = sorted
+                sorted
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
     }
 }
 

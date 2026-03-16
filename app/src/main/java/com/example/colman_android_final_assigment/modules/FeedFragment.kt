@@ -94,19 +94,7 @@ class FeedFragment : Fragment() {
 
     private fun showFilterDialog() {
         val cityIds = viewModel.availableCityIds.value ?: emptyList()
-
-        // Show the dialog immediately using cached names or fallbacks
         buildFilterDialog(cityIds)
-
-        // Asynchronously prefetch a limited number of city names to keep UI responsive
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val limitedCityIds = cityIds.take(20)
-            CityApiService.prefetchCities(limitedCityIds)
-            val updatedMap = limitedCityIds.associateWith { CityApiService.getCityNameById(it) }
-            withContext(Dispatchers.Main) {
-                cityIdToNameMap = cityIdToNameMap + updatedMap
-            }
-        }
     }
 
     private fun buildFilterDialog(cityIds: List<Int>) {
@@ -114,10 +102,12 @@ class FeedFragment : Fragment() {
 
         /* --- Category data --- */
         val categories = viewModel.availableCategories.value ?: emptyList()
-        val selectedCategories = (viewModel.selectedCategories.value ?: emptyList()).toMutableSet()
+        val categoryIds = categories.map { it.first }
+        val categoryNames = categories.map { it.second }
+        val categoryNameById = categories.associate { it.first to it.second }
+        val selectedCategoryIds = (viewModel.selectedCategoryIds.value ?: emptyList()).toMutableSet()
 
         /* --- City data --- */
-        val cityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
         val selectedCityIds = (viewModel.selectedCityIds.value ?: emptyList()).toMutableSet()
 
         /* --- Build dialog layout programmatically --- */
@@ -139,13 +129,14 @@ class FeedFragment : Fragment() {
         }
 
         // ── Category label + dropdown trigger ──
+        val selectedCategoryNames = selectedCategoryIds.mapNotNull { id -> categoryNameById[id] }
         val categoryLabel = TextView(context).apply {
             text = getString(R.string.filter_label_category)
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
             textSize = 14f
         }
         val categoryDropdown = TextView(context).apply {
-            text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+            text = summaryText(selectedCategoryNames, getString(R.string.filter_all_categories))
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
             textSize = 14f
             background = dropdownBg?.constantState?.newDrawable()?.mutate()
@@ -154,16 +145,17 @@ class FeedFragment : Fragment() {
             compoundDrawablePadding = 8
         }
         categoryDropdown.setOnClickListener {
-            val items = categories.toTypedArray()
-            val checked = BooleanArray(items.size) { items[it] in selectedCategories }
+            val items = categoryNames.toTypedArray()
+            val checked = BooleanArray(items.size) { categoryIds[it] in selectedCategoryIds }
             MaterialAlertDialogBuilder(context)
                 .setTitle(getString(R.string.filter_label_category))
                 .setMultiChoiceItems(items, checked) { _, which, isChecked ->
-                    if (isChecked) selectedCategories.add(items[which])
-                    else selectedCategories.remove(items[which])
+                    if (isChecked) selectedCategoryIds.add(categoryIds[which])
+                    else selectedCategoryIds.remove(categoryIds[which])
                 }
                 .setPositiveButton(android.R.string.ok) { d, _ ->
-                    categoryDropdown.text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+                    val updatedNames = selectedCategoryIds.mapNotNull { id -> categoryNameById[id] }
+                    categoryDropdown.text = summaryText(updatedNames, getString(R.string.filter_all_categories))
                     d.dismiss()
                 }
                 .show()
@@ -197,7 +189,9 @@ class FeedFragment : Fragment() {
             compoundDrawablePadding = 8
         }
         cityDropdown.setOnClickListener {
-            val items = cityNames.toTypedArray()
+            // Recompute names from the current map (may have been populated since dialog was built)
+            val currentCityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
+            val items = currentCityNames.toTypedArray()
             val checked = BooleanArray(items.size) { cityIds[it] in selectedCityIds }
             MaterialAlertDialogBuilder(context)
                 .setTitle(getString(R.string.filter_label_city))
@@ -220,7 +214,7 @@ class FeedFragment : Fragment() {
             .setTitle(getString(R.string.filter_dialog_title))
             .setView(container)
             .setPositiveButton(getString(R.string.filter_action_apply)) { dialog, _ ->
-                viewModel.setCategories(selectedCategories.toList())
+                viewModel.setCategories(selectedCategoryIds.toList())
                 viewModel.setCityIds(selectedCityIds.toList())
                 dialog.dismiss()
             }
@@ -245,9 +239,22 @@ class FeedFragment : Fragment() {
             adapter.submitList(posts)
         }
 
-        // Keep categories & city IDs alive so .value is populated for the filter dialog
-        viewModel.availableCategories.observe(viewLifecycleOwner) { /* no-op */ }
-        viewModel.availableCityIds.observe(viewLifecycleOwner) { /* no-op */ }
+        viewModel.categoryNameById.observe(viewLifecycleOwner) { categoryMap ->
+            adapter.updateCategoryNameMap(categoryMap)
+        }
+
+        // Proactively prefetch city names whenever the city ID list changes
+        viewModel.availableCityIds.observe(viewLifecycleOwner) { cityIds ->
+            if (cityIds.isNullOrEmpty()) return@observe
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val limitedIds = cityIds.take(20)
+                CityApiService.prefetchCities(limitedIds)
+                val updatedMap = limitedIds.associateWith { CityApiService.getCityNameById(it) }
+                withContext(Dispatchers.Main) {
+                    cityIdToNameMap = cityIdToNameMap + updatedMap
+                }
+            }
+        }
 
         viewModel.refreshState.observe(viewLifecycleOwner) { state ->
             when (state) {

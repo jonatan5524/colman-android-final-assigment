@@ -21,4 +21,23 @@
     <string name="error_empty_title">Title cannot be empty</string>
     <string name="error_empty_description">Description cannot be empty</string>
     <string name="error_empty_category">Category cannot be empty</string>
+    <string name="error_empty_city">Please select a city</string>
+    <string name="upload_image">Upload Image</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="category">Category</string>
+    <string name="search_category_hint">Type to search category&#8230;</string>
+    <string name="city">City</string>
+    <string name="search_city_hint">Type to search city&#8230;</string>
+    <string name="whatsapp_number">WhatsApp Number</string>
+    <string name="post_item">Post Item</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="cancel">Cancel</string>
+    <string name="change_photo">Change Photo</string>
+    <string name="app_title">GiveAway</string>
+    <string name="filter">Filter</string>
+    <string name="search_items_hint">Search items&#8230;</string>
+    <string name="add_new_post">Add New Post</string>
+    <string name="content_desc_post_image">Post Image</string>
+    <string name="content_desc_search_icon">Search Icon</string>
 </resources>
