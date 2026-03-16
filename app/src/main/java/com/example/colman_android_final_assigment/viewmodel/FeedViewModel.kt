@@ -4,11 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.colman_android_final_assigment.base.Resource
 import com.example.colman_android_final_assigment.model.Post
+import com.example.colman_android_final_assigment.repository.CategoryRepository
 import com.example.colman_android_final_assigment.repository.PostRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -17,14 +18,15 @@ import kotlinx.coroutines.launch
 class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepository(application)
+    private val categoryRepository = CategoryRepository(application)
 
     /* ---------- Search & filter state ---------- */
 
     private val _searchQuery = MutableLiveData("")
     val searchQuery: LiveData<String> = _searchQuery
 
-    private val _selectedCategories = MutableLiveData<List<String>>(emptyList())
-    val selectedCategories: LiveData<List<String>> = _selectedCategories
+    private val _selectedCategoryIds = MutableLiveData<List<String>>(emptyList())
+    val selectedCategoryIds: LiveData<List<String>> = _selectedCategoryIds
 
     private val _selectedCityIds = MutableLiveData<List<Int>>(emptyList())
     val selectedCityIds: LiveData<List<Int>> = _selectedCityIds
@@ -35,18 +37,37 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     /* ---------- Exposed LiveData ---------- */
 
-    // Internal mapping from user-visible category label back to its stable ID
-    private val categoryLabelToId: MutableMap<String, String> = mutableMapOf()
+    // UI category options as (categoryId, categoryName)
+    private val _availableCategories = MutableLiveData<List<Pair<String, String>>>(emptyList())
+    val availableCategories: LiveData<List<Pair<String, String>>> = _availableCategories
 
-    // User-visible list of category labels (used by the UI)
-    private val _availableCategoryLabels = MediatorLiveData<List<String>>()
-    val availableCategories: LiveData<List<String>> = _availableCategoryLabels
+    // Fast lookup for adapters (categoryId -> categoryName)
+    private val _categoryNameById = MutableLiveData<Map<String, String>>(emptyMap())
+    val categoryNameById: LiveData<Map<String, String>> = _categoryNameById
+
+    private var cachedPostCategoryIds: List<String> = emptyList()
+    private var cachedCategoryNameById: Map<String, String> = emptyMap()
+
+    private val postCategoryIdsSource = repository.getAllCategoryIdsLiveData()
+    private val categoriesSource = categoryRepository.getAllCategories()
+
+    private val postCategoryIdsObserver = Observer<List<String>> { ids ->
+        cachedPostCategoryIds = ids
+        rebuildCategoryState()
+    }
+
+    private val categoriesObserver = Observer<List<com.example.colman_android_final_assigment.model.Category>> { categories ->
+        cachedCategoryNameById = categories
+            .filter { it.id.isNotBlank() }
+            .associate { it.id to it.name }
+        rebuildCategoryState()
+    }
 
     /** Filtered posts – observed by the adapter */
     val filteredPosts: LiveData<List<Post>> = _debouncedQuery.switchMap { query ->
         repository.getFilteredPostsMultiLiveData(
             query,
-            _selectedCategories.value ?: emptyList(),
+            _selectedCategoryIds.value ?: emptyList(),
             _selectedCityIds.value ?: emptyList()
         )
     }
@@ -60,21 +81,17 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     val refreshState: LiveData<Resource<Unit>> = _refreshState
 
     init {
-        // Map category IDs from the repository into user-visible labels and keep
-        // a reverse mapping so we can convert labels back to IDs for filtering.
-        _availableCategoryLabels.addSource(repository.getAllCategoryIdsLiveData()) { ids ->
-            val newLabelToId = mutableMapOf<String, String>()
-            val labels = ids.map { id ->
-                val label = toCategoryLabel(id)
-                newLabelToId[label] = id
-                label
-            }
-            categoryLabelToId.clear()
-            categoryLabelToId.putAll(newLabelToId)
-            _availableCategoryLabels.value = labels
-        }
+        postCategoryIdsSource.observeForever(postCategoryIdsObserver)
+        categoriesSource.observeForever(categoriesObserver)
 
+        refreshCategories()
         refreshPosts()
+    }
+
+    override fun onCleared() {
+        postCategoryIdsSource.removeObserver(postCategoryIdsObserver)
+        categoriesSource.removeObserver(categoriesObserver)
+        super.onCleared()
     }
 
     fun refreshPosts() {
@@ -96,15 +113,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Set categories filter based on user-visible labels (empty list = all categories). */
-    fun setCategories(categories: List<String>) {
-        // The UI passes category labels; convert them back to IDs for filtering.
-        val ids = if (categories.isEmpty()) {
-            emptyList()
-        } else {
-            categories.mapNotNull { label -> categoryLabelToId[label] }
-        }
-        _selectedCategories.value = ids
+    /** Set category IDs filter (empty list = all categories). */
+    fun setCategories(categoryIds: List<String>) {
+        _selectedCategoryIds.value = categoryIds.distinct()
         reapplyFilter()
     }
 
@@ -117,7 +128,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     /** Clear all filters and the search bar text. */
     fun resetFilters() {
         _searchQuery.value = ""
-        _selectedCategories.value = emptyList()
+        _selectedCategoryIds.value = emptyList()
         _selectedCityIds.value = emptyList()
         debounceJob?.cancel()
         debounceJob = null
@@ -129,21 +140,28 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         _debouncedQuery.value = _debouncedQuery.value ?: ""
     }
 
-    /**
-     * Convert a technical category ID into a user-visible label.
-     * This avoids exposing raw IDs (e.g. "FURNITURE_ELECTRONICS") directly to the UI.
-     */
-    private fun toCategoryLabel(id: String): String {
-        if (id.isBlank()) return id
-        // Example transformations:
-        //  - "FURNITURE_ELECTRONICS" -> "Furniture Electronics"
-        //  - "furniture" -> "Furniture"
-        val normalized = id.lowercase().replace('_', ' ')
-        return normalized.split(' ')
-            .filter { it.isNotBlank() }
-            .joinToString(" ") { part ->
-                part.replaceFirstChar { ch -> if (ch.isLowerCase()) ch.titlecase() else ch.toString() }
-            }
+    private fun refreshCategories() {
+        viewModelScope.launch {
+            categoryRepository.refreshCategories()
+        }
+    }
+
+    private fun rebuildCategoryState() {
+        val idToName = cachedPostCategoryIds.associateWith { categoryId ->
+            cachedCategoryNameById[categoryId].orEmpty().ifBlank { categoryId }
+        }
+
+        _categoryNameById.value = idToName
+        _availableCategories.value = cachedPostCategoryIds.map { id ->
+            id to (idToName[id] ?: id)
+        }
+
+        val validSelected = (_selectedCategoryIds.value ?: emptyList())
+            .filter { idToName.containsKey(it) }
+        if (validSelected != _selectedCategoryIds.value) {
+            _selectedCategoryIds.value = validSelected
+            reapplyFilter()
+        }
     }
 }
 

@@ -114,7 +114,10 @@ class FeedFragment : Fragment() {
 
         /* --- Category data --- */
         val categories = viewModel.availableCategories.value ?: emptyList()
-        val selectedCategories = (viewModel.selectedCategories.value ?: emptyList()).toMutableSet()
+        val categoryIds = categories.map { it.first }
+        val categoryNames = categories.map { it.second }
+        val categoryNameById = categories.associate { it.first to it.second }
+        val selectedCategoryIds = (viewModel.selectedCategoryIds.value ?: emptyList()).toMutableSet()
 
         /* --- City data --- */
         val cityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
@@ -139,13 +142,14 @@ class FeedFragment : Fragment() {
         }
 
         // ── Category label + dropdown trigger ──
+        val selectedCategoryNames = selectedCategoryIds.mapNotNull { id -> categoryNameById[id] }
         val categoryLabel = TextView(context).apply {
             text = getString(R.string.filter_label_category)
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
             textSize = 14f
         }
         val categoryDropdown = TextView(context).apply {
-            text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+            text = summaryText(selectedCategoryNames, getString(R.string.filter_all_categories))
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
             textSize = 14f
             background = dropdownBg?.constantState?.newDrawable()?.mutate()
@@ -154,16 +158,17 @@ class FeedFragment : Fragment() {
             compoundDrawablePadding = 8
         }
         categoryDropdown.setOnClickListener {
-            val items = categories.toTypedArray()
-            val checked = BooleanArray(items.size) { items[it] in selectedCategories }
+            val items = categoryNames.toTypedArray()
+            val checked = BooleanArray(items.size) { categoryIds[it] in selectedCategoryIds }
             MaterialAlertDialogBuilder(context)
                 .setTitle(getString(R.string.filter_label_category))
                 .setMultiChoiceItems(items, checked) { _, which, isChecked ->
-                    if (isChecked) selectedCategories.add(items[which])
-                    else selectedCategories.remove(items[which])
+                    if (isChecked) selectedCategoryIds.add(categoryIds[which])
+                    else selectedCategoryIds.remove(categoryIds[which])
                 }
                 .setPositiveButton(android.R.string.ok) { d, _ ->
-                    categoryDropdown.text = summaryText(selectedCategories, getString(R.string.filter_all_categories))
+                    val updatedNames = selectedCategoryIds.mapNotNull { id -> categoryNameById[id] }
+                    categoryDropdown.text = summaryText(updatedNames, getString(R.string.filter_all_categories))
                     d.dismiss()
                 }
                 .show()
@@ -220,7 +225,7 @@ class FeedFragment : Fragment() {
             .setTitle(getString(R.string.filter_dialog_title))
             .setView(container)
             .setPositiveButton(getString(R.string.filter_action_apply)) { dialog, _ ->
-                viewModel.setCategories(selectedCategories.toList())
+                viewModel.setCategories(selectedCategoryIds.toList())
                 viewModel.setCityIds(selectedCityIds.toList())
                 dialog.dismiss()
             }
@@ -243,6 +248,10 @@ class FeedFragment : Fragment() {
         // Observe filtered posts (replaces the old allPosts observer)
         viewModel.filteredPosts.observe(viewLifecycleOwner) { posts ->
             adapter.submitList(posts)
+        }
+
+        viewModel.categoryNameById.observe(viewLifecycleOwner) { categoryMap ->
+            adapter.updateCategoryNameMap(categoryMap)
         }
 
         // Keep categories & city IDs alive so .value is populated for the filter dialog
