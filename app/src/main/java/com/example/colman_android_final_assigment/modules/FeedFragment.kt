@@ -94,19 +94,7 @@ class FeedFragment : Fragment() {
 
     private fun showFilterDialog() {
         val cityIds = viewModel.availableCityIds.value ?: emptyList()
-
-        // Show the dialog immediately using cached names or fallbacks
         buildFilterDialog(cityIds)
-
-        // Asynchronously prefetch a limited number of city names to keep UI responsive
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val limitedCityIds = cityIds.take(20)
-            CityApiService.prefetchCities(limitedCityIds)
-            val updatedMap = limitedCityIds.associateWith { CityApiService.getCityNameById(it) }
-            withContext(Dispatchers.Main) {
-                cityIdToNameMap = cityIdToNameMap + updatedMap
-            }
-        }
     }
 
     private fun buildFilterDialog(cityIds: List<Int>) {
@@ -120,7 +108,6 @@ class FeedFragment : Fragment() {
         val selectedCategoryIds = (viewModel.selectedCategoryIds.value ?: emptyList()).toMutableSet()
 
         /* --- City data --- */
-        val cityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
         val selectedCityIds = (viewModel.selectedCityIds.value ?: emptyList()).toMutableSet()
 
         /* --- Build dialog layout programmatically --- */
@@ -202,7 +189,9 @@ class FeedFragment : Fragment() {
             compoundDrawablePadding = 8
         }
         cityDropdown.setOnClickListener {
-            val items = cityNames.toTypedArray()
+            // Recompute names from the current map (may have been populated since dialog was built)
+            val currentCityNames = cityIds.map { cityIdToNameMap[it] ?: getString(R.string.filter_city_fallback, it) }
+            val items = currentCityNames.toTypedArray()
             val checked = BooleanArray(items.size) { cityIds[it] in selectedCityIds }
             MaterialAlertDialogBuilder(context)
                 .setTitle(getString(R.string.filter_label_city))
@@ -254,9 +243,18 @@ class FeedFragment : Fragment() {
             adapter.updateCategoryNameMap(categoryMap)
         }
 
-        // Keep categories & city IDs alive so .value is populated for the filter dialog
-        viewModel.availableCategories.observe(viewLifecycleOwner) { /* no-op */ }
-        viewModel.availableCityIds.observe(viewLifecycleOwner) { /* no-op */ }
+        // Proactively prefetch city names whenever the city ID list changes
+        viewModel.availableCityIds.observe(viewLifecycleOwner) { cityIds ->
+            if (cityIds.isNullOrEmpty()) return@observe
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val limitedIds = cityIds.take(20)
+                CityApiService.prefetchCities(limitedIds)
+                val updatedMap = limitedIds.associateWith { CityApiService.getCityNameById(it) }
+                withContext(Dispatchers.Main) {
+                    cityIdToNameMap = cityIdToNameMap + updatedMap
+                }
+            }
+        }
 
         viewModel.refreshState.observe(viewLifecycleOwner) { state ->
             when (state) {
