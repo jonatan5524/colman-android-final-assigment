@@ -11,7 +11,7 @@ import com.example.colman_android_final_assigment.model.Category
 import com.example.colman_android_final_assigment.model.Post
 import com.example.colman_android_final_assigment.model.User
 
-@Database(entities = [User::class, Post::class, Category::class], version = 3)
+@Database(entities = [User::class, Post::class, Category::class], version = 4)
 abstract class AppLocalDb : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun postDao(): PostDao

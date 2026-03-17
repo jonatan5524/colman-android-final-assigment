@@ -43,6 +43,7 @@ class EditProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.editNameEditText.setText(args.name)
+        binding.editPhoneEditText.setText(args.phone)
         if (args.imgUrl.isNotEmpty()) {
             Picasso.get().load(args.imgUrl).placeholder(R.drawable.ic_person_placeholder).into(binding.editProfileImage)
         }
@@ -53,10 +54,11 @@ class EditProfileFragment : Fragment() {
 
         binding.saveProfileButton.setOnClickListener {
             val name = binding.editNameEditText.text.toString()
-            if (name.isNotEmpty()) {
-                viewModel.updateProfile(name, imageUri)
+            val phone = binding.editPhoneEditText.text.toString()
+            if (name.isNotEmpty() && phone.isNotEmpty()) {
+                viewModel.updateProfile(name, phone, imageUri)
             } else {
-                Toast.makeText(context, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Fields cannot be empty", Toast.LENGTH_SHORT).show()
             }
         }
 

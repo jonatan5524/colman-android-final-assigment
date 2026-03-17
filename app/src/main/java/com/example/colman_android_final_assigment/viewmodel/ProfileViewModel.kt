@@ -30,10 +30,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val _updateState = MutableLiveData<Resource<Unit>>()
     val updateState: LiveData<Resource<Unit>> = _updateState
 
-    fun updateProfile(name: String, imageUri: Uri?) {
+    fun updateProfile(name: String, phone: String, imageUri: Uri?) {
         _updateState.value = Resource.Loading
         viewModelScope.launch {
-            _updateState.value = repository.updateProfile(name, imageUri)
+            _updateState.value = repository.updateProfile(name, phone, imageUri)
         }
     }
 

@@ -45,13 +45,28 @@
             android:inputType="textPersonName" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/edit_phone_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="WhatsApp Number"
+        app:layout_constraintTop_toBottomOf="@id/edit_name_layout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_phone_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:id="@+id/save_profile_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Save Changes"
-        app:layout_constraintTop_toBottomOf="@id/edit_name_layout" />
+        app:layout_constraintTop_toBottomOf="@id/edit_phone_layout" />
 
     <Button
         android:id="@+id/cancel_edit_profile_button"

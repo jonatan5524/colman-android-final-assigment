@@ -21,7 +21,7 @@ class AuthRepository(context: Context) {
     fun getCurrentUser(): User? {
         val firebaseUser = auth.currentUser
         return firebaseUser?.let {
-            User(id = it.uid, name = it.displayName ?: "", email = it.email ?: "")
+            User(id = it.uid, name = it.displayName ?: "", email = it.email ?: "", phone = "")
         }
     }
 
@@ -38,7 +38,7 @@ class AuthRepository(context: Context) {
         }
     }
 
-    suspend fun register(name: String, email: String, pass: String, imageUri: Uri?): Resource<Unit> {
+    suspend fun register(name: String, email: String, pass: String, phone: String, imageUri: Uri?): Resource<Unit> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
             val uid = authResult.user?.uid ?: throw Exception("User creation failed")
@@ -50,7 +50,7 @@ class AuthRepository(context: Context) {
                 avatarUrl = ref.downloadUrl.await().toString()
             }
 
-            val user = User(id = uid, name = name, email = email, avatarUrl = avatarUrl)
+            val user = User(id = uid, name = name, email = email, phone = phone, avatarUrl = avatarUrl)
             firestore.collection("users").document(uid).set(user).await()
             
             // Cache locally
@@ -62,10 +62,13 @@ class AuthRepository(context: Context) {
         }
     }
 
-    suspend fun updateProfile(name: String, imageUri: Uri?): Resource<Unit> {
+    suspend fun updateProfile(name: String, phone: String, imageUri: Uri?): Resource<Unit> {
         return try {
             val uid = auth.currentUser?.uid ?: throw Exception("Not logged in")
-            val updates = mutableMapOf<String, Any>("name" to name)
+            val updates = mutableMapOf<String, Any>(
+                "name" to name,
+                "phone" to phone
+            )
 
             if (imageUri != null) {
                 val ref = storage.reference.child("avatars/$uid.jpg")
