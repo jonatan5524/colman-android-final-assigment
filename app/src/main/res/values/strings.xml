@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">colman-android-final-assigment</string>
     <string name="post_item_title_hint">Item Title</string>
@@ -40,8 +41,19 @@
     <string name="add_new_post">Add New Post</string>
     <string name="content_desc_post_image">Post Image</string>
     <string name="content_desc_search_icon">Search Icon</string>
+    <string name="back">Back</string>
+    <string name="post_details_title">Post Details</string>
     <string name="contact_owner">Contact Owner</string>
     <string name="post_details_city">City: %1$s</string>
     <string name="post_details_city_loading">City: Loading&#8230;</string>
     <string name="post_details_category">Category: %1$s</string>
+    <string name="post_details_owner_name">Posted by: %1$s</string>
+    <string name="post_details_owner_phone">Phone: %1$s</string>
+    <string name="unknown_user">Unknown user</string>
+    <string name="no_phone_number">No phone number</string>
+    <string name="post_not_loaded">Post details are not loaded yet</string>
+    <string name="default_current_user_name">a GiveAway user</string>
+    <string name="whatsapp_phone_missing">Owner phone number is missing</string>
+    <string name="whatsapp_not_installed">No app can open WhatsApp chat link</string>
+    <string name="whatsapp_contact_message">Hello %1$s, My name is %2$s. I\'m reaching from the app GiveAway about your %3$s, is it still available?</string>
 </resources>

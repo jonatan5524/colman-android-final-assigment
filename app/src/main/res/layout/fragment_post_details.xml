@@ -9,17 +9,35 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:paddingHorizontal="18dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="18dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/details_toolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:contentInsetStartWithNavigation="0dp"
+            android:minHeight="48dp"
+            android:navigationContentDescription="@string/back"
+            android:navigationIcon="@drawable/ic_arrow_back_24"
+            android:title="@string/post_details_title"
+            android:titleTextAppearance="?attr/textAppearanceTitleMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/image_card"
             android:layout_width="0dp"
             android:layout_height="240dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/details_toolbar"
             app:strokeColor="?attr/colorOutline"
             app:strokeWidth="1dp">
 
@@ -47,10 +65,10 @@
             android:id="@+id/content_card"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="18dp"
             app:cardBackgroundColor="@color/theme_surface"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="3dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="1dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/image_card"
@@ -75,7 +93,7 @@
                     android:id="@+id/details_city"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorPrimary" />
 
@@ -86,6 +104,22 @@
                     android:layout_marginTop="6dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/theme_text_secondary" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/details_owner_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/theme_text_primary" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/details_owner_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/theme_text_primary" />
 
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
@@ -115,14 +149,14 @@
             android:id="@+id/contact_button"
             style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginBottom="6dp"
             android:backgroundTint="#25D366"
             android:text="@string/contact_owner"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            app:cornerRadius="16dp"
+            app:cornerRadius="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
