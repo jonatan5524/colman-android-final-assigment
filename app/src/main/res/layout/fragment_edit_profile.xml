@@ -50,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="WhatsApp Number"
+        android:hint="@string/phone_number"
         app:layout_constraintTop_toBottomOf="@id/edit_name_layout">
 
         <com.google.android.material.textfield.TextInputEditText

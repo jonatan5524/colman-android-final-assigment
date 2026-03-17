@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:backgroundTint="#25D366"
-            android:text="Contact via WhatsApp"
+            android:text="Contact Owner"
             android:textColor="@android:color/white"
             app:layout_constraintTop_toBottomOf="@id/details_description" />
 

@@ -29,7 +29,7 @@
     <string name="search_category_hint">Type to search category&#8230;</string>
     <string name="city">City</string>
     <string name="search_city_hint">Type to search city&#8230;</string>
-    <string name="whatsapp_number">WhatsApp Number</string>
+    <string name="phone_number">Phone Number</string>
     <string name="post_item">Post Item</string>
     <string name="save_changes">Save Changes</string>
     <string name="cancel">Cancel</string>
