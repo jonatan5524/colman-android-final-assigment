@@ -23,10 +23,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun register(name: String, email: String, pass: String, imageUri: Uri?) {
+    fun register(name: String, email: String, pass: String, phone: String, imageUri: Uri?) {
         _authState.value = Resource.Loading
         viewModelScope.launch {
-            _authState.value = repository.register(name, email, pass, imageUri)
+            _authState.value = repository.register(name, email, pass, phone, imageUri)
         }
     }
 

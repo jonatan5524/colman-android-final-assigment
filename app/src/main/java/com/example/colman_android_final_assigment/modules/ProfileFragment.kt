@@ -18,6 +18,7 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: ProfileViewModel by viewModels()
     private var currentAvatarUrl: String = ""
+    private var currentPhone: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +38,9 @@ class ProfileFragment : Fragment() {
                 val user = resource.data
                 binding.profileName.text = user.name
                 binding.profileEmail.text = user.email
+                binding.profilePhone.text = user.phone
                 currentAvatarUrl = user.avatarUrl
+                currentPhone = user.phone
                 if (user.avatarUrl.isNotEmpty()) {
                     Picasso.get().load(user.avatarUrl).placeholder(R.drawable.ic_person_placeholder).into(binding.profileImage)
                 }
@@ -56,7 +59,8 @@ class ProfileFragment : Fragment() {
             val name = binding.profileName.text.toString()
             val action = ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment(
                 name = name,
-                imgUrl = currentAvatarUrl
+                imgUrl = currentAvatarUrl,
+                phone = currentPhone
             )
             findNavController().navigate(action)
         }
