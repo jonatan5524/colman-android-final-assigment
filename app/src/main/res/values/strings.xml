@@ -40,4 +40,8 @@
     <string name="add_new_post">Add New Post</string>
     <string name="content_desc_post_image">Post Image</string>
     <string name="content_desc_search_icon">Search Icon</string>
+    <string name="contact_owner">Contact Owner</string>
+    <string name="post_details_city">City: %1$s</string>
+    <string name="post_details_city_loading">City: Loading&#8230;</string>
+    <string name="post_details_category">Category: %1$s</string>
 </resources>

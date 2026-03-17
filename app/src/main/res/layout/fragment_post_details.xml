@@ -12,8 +12,19 @@
             android:id="@+id/details_image"
             android:layout_width="match_parent"
             android:layout_height="300dp"
+            android:contentDescription="@string/content_desc_post_image"
             android:scaleType="centerCrop"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/details_progress_bar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/details_image"
+            app:layout_constraintEnd_toEndOf="@id/details_image"
+            app:layout_constraintStart_toStartOf="@id/details_image"
+            app:layout_constraintTop_toTopOf="@id/details_image" />
 
         <TextView
             android:id="@+id/details_title"
@@ -42,15 +53,25 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/details_city" />
 
+        <TextView
+            android:id="@+id/details_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/details_description" />
+
         <Button
             android:id="@+id/contact_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:backgroundTint="#25D366"
-            android:text="Contact Owner"
+            android:text="@string/contact_owner"
             android:textColor="@android:color/white"
-            app:layout_constraintTop_toBottomOf="@id/details_description" />
+            app:layout_constraintTop_toBottomOf="@id/details_category" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
