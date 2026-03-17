@@ -21,7 +21,12 @@ class AuthRepository(context: Context) {
     fun getCurrentUser(): User? {
         val firebaseUser = auth.currentUser
         return firebaseUser?.let {
-            User(id = it.uid, name = it.displayName ?: "", email = it.email ?: "", phone = "")
+            User(
+                id = it.uid,
+                name = it.displayName ?: "",
+                email = it.email ?: "",
+                phone = it.phoneNumber ?: ""
+            )
         }
     }
 
