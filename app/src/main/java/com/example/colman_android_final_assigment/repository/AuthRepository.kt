@@ -30,6 +30,10 @@ class AuthRepository(context: Context) {
         }
     }
 
+    fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    fun observeCachedUserById(userId: String): LiveData<User?> = userDao.getUserById(userId)
+
     suspend fun login(email: String, pass: String): Resource<Unit> {
         return try {
             auth.signInWithEmailAndPassword(email, pass).await()
@@ -93,14 +97,14 @@ class AuthRepository(context: Context) {
         }
     }
 
-    private suspend fun refreshUserDetails(uid: String) {
+    suspend fun refreshUserDetails(uid: String) {
         try {
             val snapshot = firestore.collection("users").document(uid).get().await()
             val user = snapshot.toObject(User::class.java)
             if (user != null) {
                 userDao.insertUser(user)
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Log or handle sync error
         }
     }
