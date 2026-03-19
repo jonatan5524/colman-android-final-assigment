@@ -105,7 +105,7 @@ class AuthRepository(context: Context) {
                 userDao.insertUser(user)
             }
         } catch (_: Exception) {
-            // Log or handle sync error
+            Resource.Error(e.localizedMessage ?: "Refresh user details failed")
         }
     }
 
