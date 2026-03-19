@@ -19,9 +19,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.example.colman_android_final_assigment.model.Post
 
 class FeedFragment : Fragment() {
 
@@ -60,7 +62,10 @@ class FeedFragment : Fragment() {
     /* ------------------------------------------------------------------ */
 
     private fun setupRecyclerView() {
-        adapter = PostsAdapter()
+        adapter = PostsAdapter(onPostClick = { post: Post ->
+            val action = FeedFragmentDirections.actionFeedFragmentToPostDetailsFragment(post.id)
+            findNavController().navigate(action)
+        })
         binding.feedRecyclerView.adapter = adapter
     }
 
