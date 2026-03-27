@@ -97,7 +97,18 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshPosts() {
         viewModelScope.launch {
             _refreshState.value = Resource.Loading
-            _refreshState.value = repository.refreshPosts()
+            val result = repository.refreshPosts(reset = true)
+            _refreshState.value = result
+        }
+    }
+
+    fun loadMorePosts() {
+        if (_refreshState.value is Resource.Loading) return
+        
+        viewModelScope.launch {
+            _refreshState.value = Resource.Loading
+            val result = repository.refreshPosts(reset = false)
+            _refreshState.value = result
         }
     }
 

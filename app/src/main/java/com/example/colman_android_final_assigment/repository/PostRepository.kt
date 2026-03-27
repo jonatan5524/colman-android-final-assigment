@@ -53,15 +53,46 @@ class PostRepository(context: Context) {
     /** LiveData for given post count of a user */
     fun getGivenCountByUser(userId: String): LiveData<Int> = postDao.getGivenCountByUser(userId)
 
+    private val authRepository = AuthRepository(context)
+    private var lastDocumentSnapshot: com.google.firebase.firestore.DocumentSnapshot? = null
+
     /**
      * Fetch all posts from Firestore and refresh the local Room cache.
+     * Supports pagination via limit and internal tracking of lastDocumentSnapshot.
+     * @param reset If true, clears the local cache and starts fetching from the beginning.
      */
-    suspend fun refreshPosts(): Resource<Unit> {
+    suspend fun refreshPosts(reset: Boolean = false, limit: Long = 10): Resource<Unit> {
         return try {
-            val snapshot = firestore.collection("posts").get().await()
+            if (reset) {
+                lastDocumentSnapshot = null
+            }
+
+            var query = firestore.collection("posts")
+                .orderBy("title") // Consistent ordering is required for pagination
+                .limit(limit)
+
+            lastDocumentSnapshot?.let {
+                query = query.startAfter(it)
+            }
+
+            val snapshot = query.get().await()
             val posts = mapSnapshotToPosts(snapshot)
-            postDao.clearAll()
+
+            if (reset) {
+                postDao.clearAll()
+            }
+            
             postDao.insertAll(posts)
+
+            val uniqueUserIds = posts.map { it.userId }.distinct()
+            uniqueUserIds.forEach { userId ->
+                authRepository.refreshUserDetails(userId)
+            }
+
+            if (snapshot.documents.isNotEmpty()) {
+                lastDocumentSnapshot = snapshot.documents.last()
+            }
+
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Failed to refresh posts")

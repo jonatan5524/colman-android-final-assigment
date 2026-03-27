@@ -67,6 +67,25 @@ class FeedFragment : Fragment() {
             findNavController().navigate(action)
         })
         binding.feedRecyclerView.adapter = adapter
+
+        binding.feedRecyclerView.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                
+                // Only trigger if scrolling down
+                if (dy <= 0) return
+
+                val layoutManager = recyclerView.layoutManager as androidx.recyclerview.widget.GridLayoutManager
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                // Load more if we are 2 items away from the bottom
+                if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 2 && totalItemCount > 0) {
+                    viewModel.loadMorePosts()
+                }
+            }
+        })
     }
 
     /* ------------------------------------------------------------------ */

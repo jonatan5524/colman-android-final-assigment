@@ -97,14 +97,17 @@ class AuthRepository(context: Context) {
         }
     }
 
-    suspend fun refreshUserDetails(uid: String) {
-        try {
+    suspend fun refreshUserDetails(uid: String): Resource<Unit> {
+        return try {
             val snapshot = firestore.collection("users").document(uid).get().await()
             val user = snapshot.toObject(User::class.java)
             if (user != null) {
                 userDao.insertUser(user)
+                Resource.Success(Unit)
+            } else {
+                Resource.Error("User not found")
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Refresh user details failed")
         }
     }
